@@ -247,7 +247,9 @@ function applyPermissions() {
 
 <script>
 // ===== DATA =====
-const DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":63,"newPhones":10,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":80,"newPhones":12,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":93,"newPhones":13,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":7,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":10,"leads":20},{"month":"6月","phones":10,"leads":22},{"month":"7月","phones":10,"leads":25},{"month":"8月","phones":10,"leads":28},{"month":"9月","phones":10,"leads":28},{"month":"10月","phones":10,"leads":20},{"month":"11月","phones":10,"leads":28},{"month":"12月","phones":10,"leads":30}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":10,"leads":15},{"month":"7月","phones":10,"leads":20},{"month":"8月","phones":10,"leads":22},{"month":"9月","phones":10,"leads":22},{"month":"10月","phones":10,"leads":15},{"month":"11月","phones":10,"leads":22},{"month":"12月","phones":10,"leads":25}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本","amt":69300},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
+const DEFAULT_DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":63,"newPhones":10,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":80,"newPhones":12,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":93,"newPhones":13,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":7,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":10,"leads":20},{"month":"6月","phones":10,"leads":22},{"month":"7月","phones":10,"leads":25},{"month":"8月","phones":10,"leads":28},{"month":"9月","phones":10,"leads":28},{"month":"10月","phones":10,"leads":20},{"month":"11月","phones":10,"leads":28},{"month":"12月","phones":10,"leads":30}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":10,"leads":15},{"month":"7月","phones":10,"leads":20},{"month":"8月","phones":10,"leads":22},{"month":"9月","phones":10,"leads":22},{"month":"10月","phones":10,"leads":15},{"month":"11月","phones":10,"leads":22},{"month":"12月","phones":10,"leads":25}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本","amt":69300},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
+// Load saved plan data or use defaults
+const DATA = JSON.parse(localStorage.getItem('budget2026_plan') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
 
 // Actual data storage (persisted to localStorage)
 let actualData = JSON.parse(localStorage.getItem('budget2026_actual') || 'null') || {
@@ -259,9 +261,21 @@ let actualData = JSON.parse(localStorage.getItem('budget2026_actual') || 'null')
 
 function save() {
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
+  localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
   const ind = document.getElementById('syncIndicator');
   ind.classList.add('show');
   setTimeout(() => ind.classList.remove('show'), 1500);
+}
+function updatePlan(el) {
+  const section = el.dataset.section;
+  const mi = parseInt(el.dataset.month);
+  const key = el.dataset.key;
+  const val = parseFloat(el.value) || 0;
+  if (section === 'domestic') DATA.domestic[mi][key] = val;
+  else if (section === 'tk') DATA.tk[mi][key] = val;
+  else if (section === 'ecom') DATA.ecom[mi][key] = val;
+  else if (section === 'train') DATA.train[mi][key] = val;
+  save(); renderAll();
 }
 
 function fmt(n) { return typeof n === 'number' ? n.toLocaleString() : n; }
@@ -276,8 +290,17 @@ function adjInput(attrs, val) {
     '<button class="adj-btn" onclick="adjVal(\'' + id + '\',1)">+</button>' +
     '</div>';
 }
+function planInp(section, mi, key, val) {
+  const id = 'plan_' + section + '_' + mi + '_' + key;
+  return '<div class="adj-wrap">' +
+    '<button class="adj-btn" onclick="adjVal(\'' + id + '\',-1,true)">−</button>' +
+    '<input class="cell-input" id="' + id + '" type="number" value="' + (val||0) + '" data-section="' + section + '" data-month="' + mi + '" data-key="' + key + '" onchange="updatePlan(this)">' +
+    '<button class="adj-btn" onclick="adjVal(\'' + id + '\',1,true)">+</button>' +
+    '</div>';
+}
 function adjVal(id, delta) {
   const el = document.getElementById(id);
+  if (!el) return;
   const cur = parseFloat(el.value) || 0;
   el.value = Math.max(0, cur + delta);
   el.dispatchEvent(new Event('change'));
@@ -321,8 +344,8 @@ function getTotalActualTK() {
 function renderKPI() {
   const totalActDom = getTotalActualDomestic();
   const totalActTK = getTotalActualTK();
-  const totalBaodi = 3622;
-  const totalChallenge = 4165;
+  let totalBaodi = 0, totalChallenge = 0;
+  DATA.domestic.forEach(d => { totalBaodi += d.baodi; totalChallenge += d.challenge; });
   const totalCost = 871640;
   const domRate = totalBaodi > 0 ? (totalActDom/totalBaodi*100) : 0;
 
@@ -399,7 +422,7 @@ function renderCostBars() {
 
 function renderDomesticTable() {
   const months = DATA.months;
-  let html = '<tr><th rowspan="2">指标</th>';
+  let html = '<tr><th>指标</th>';
   months.forEach(m => html += `<th>${m}</th>`);
   html += '<th>全年</th></tr>';
 
@@ -422,7 +445,8 @@ function renderDomesticTable() {
     months.forEach((m,i) => {
       const v = DATA.domestic[i][r.key];
       if (r.sum && typeof v === 'number') total += v;
-      html += `<td>${fmt(v)}</td>`;
+      else if (!r.sum) total = '—';
+      html += '<td>' + planInp('domestic', i, r.key, v) + '</td>';
     });
     html += `<td class="total-row">${r.sum ? fmt(total) : '—'}</td></tr>`;
   });
@@ -485,20 +509,20 @@ function renderTKTable() {
   html += '<th>全年</th></tr>';
 
   const tkRows = [
-    {label:'手机台数', get: t=>t.phones},
-    {label:'美区+泰区(低)', get: t=>t.us_low, sum:true},
-    {label:'美区+泰区(高)', get: t=>t.us_high, sum:true},
-    {label:'英区新增', get: t=>t.uk, sum:true},
-    {label:'月合计(低/保守)', get: t=>t.low, sum:true, cls:'highlight'},
-    {label:'月合计(高/乐观)', get: t=>t.high, sum:true, cls:'highlight'},
+    {label:'手机台数', key:'phones'},
+    {label:'美区+泰区(低)', key:'us_low', sum:true},
+    {label:'美区+泰区(高)', key:'us_high', sum:true},
+    {label:'英区新增', key:'uk', sum:true},
+    {label:'月合计(低/保守)', key:'low', sum:true, cls:'highlight'},
+    {label:'月合计(高/乐观)', key:'high', sum:true, cls:'highlight'},
   ];
   tkRows.forEach(r => {
     let total = 0;
     html += `<tr${r.cls?' class="'+r.cls+'"':''}><td class="row-header">${r.label}</td>`;
     DATA.tk.forEach((t,i) => {
-      const v = r.get(t);
+      const v = t[r.key];
       if (r.sum && typeof v === 'number') total += v;
-      html += `<td>${fmt(v)}</td>`;
+      html += '<td>' + planInp('tk', i, r.key, v) + '</td>';
     });
     html += `<td class="total-row">${r.sum?fmt(total):'—'}</td></tr>`;
   });
@@ -535,12 +559,13 @@ function renderNewProjects() {
   html += '<th>合计</th></tr>';
 
   html += '<tr><td class="row-header">手机台数</td>';
-  DATA.ecom.forEach(e => html += `<td>${e.phones||'—'}</td>`);
-  html += '<td>10</td></tr>';
+  let ecomPhones = 0;
+  DATA.ecom.forEach((e,i) => { ecomPhones += e.phones; html += '<td>' + planInp('ecom', i, 'phones', e.phones) + '</td>'; });
+  html += `<td class="total-row">${ecomPhones||'—'}</td></tr>`;
 
   html += '<tr><td class="row-header">预计进线</td>';
   let ecomSum = 0;
-  DATA.ecom.forEach(e => { ecomSum += e.leads; html += `<td>${e.leads||'—'}</td>`; });
+  DATA.ecom.forEach((e,i) => { ecomSum += e.leads; html += '<td>' + planInp('ecom', i, 'leads', e.leads) + '</td>'; });
   html += `<td class="total-row">${ecomSum}</td></tr>`;
 
   html += '<tr style="background:#fffde7"><td class="row-header">实际进线</td>';
@@ -549,7 +574,7 @@ function renderNewProjects() {
     const v = actualData.ecom[i] || '';
     if (v) ecomActTotal += v;
     const a = 'data-type="ecom" data-month="'+i+'"';
-    html += '<td>' + (DATA.ecom[i].phones ? adjInput(a, v) : '—') + '</td>';
+    html += '<td>' + adjInput(a, v) + '</td>';
   });
   html += `<td class="total-row">${ecomActTotal||'—'}</td></tr>`;
   document.getElementById('ecomTable').innerHTML = html;
@@ -560,12 +585,13 @@ function renderNewProjects() {
   html += '<th>合计</th></tr>';
 
   html += '<tr><td class="row-header">手机台数</td>';
-  DATA.train.forEach(t => html += `<td>${t.phones||'—'}</td>`);
-  html += '<td>10</td></tr>';
+  let trainPhones = 0;
+  DATA.train.forEach((t,i) => { trainPhones += t.phones; html += '<td>' + planInp('train', i, 'phones', t.phones) + '</td>'; });
+  html += `<td class="total-row">${trainPhones||'—'}</td></tr>`;
 
   html += '<tr><td class="row-header">预计招生/线索</td>';
   let trainSum = 0;
-  DATA.train.forEach(t => { trainSum += t.leads; html += `<td>${t.leads||'—'}</td>`; });
+  DATA.train.forEach((t,i) => { trainSum += t.leads; html += '<td>' + planInp('train', i, 'leads', t.leads) + '</td>'; });
   html += `<td class="total-row">${trainSum}</td></tr>`;
 
   html += '<tr style="background:#fffde7"><td class="row-header">实际招生</td>';
@@ -574,7 +600,7 @@ function renderNewProjects() {
     const v = actualData.train[i] || '';
     if (v) trainActTotal += v;
     const a = 'data-type="train" data-month="'+i+'"';
-    html += '<td>' + (DATA.train[i].phones ? adjInput(a, v) : '—') + '</td>';
+    html += '<td>' + adjInput(a, v) + '</td>';
   });
   html += `<td class="total-row">${trainActTotal||'—'}</td></tr>`;
   document.getElementById('trainTable').innerHTML = html;
