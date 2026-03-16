@@ -563,9 +563,11 @@ function adjInput(attrs, val) {
     '<button class="adj-btn" onclick="adjVal(\'' + id + '\',1)">+</button>' +
     '</div>';
 }
+// 员工不可编辑的字段（只锁目标数据）
+const LOCKED_KEYS_STAFF = ['dy_target','xhs_target','sph_target'];
 function planInp(section, mi, key, val) {
-  // 员工只能看，不能改计划数据
-  if (userRole === 'staff') {
+  // 员工：只锁三大平台目标，其他运营数据可编辑
+  if (userRole === 'staff' && LOCKED_KEYS_STAFF.includes(key)) {
     return '<span style="font-weight:600">' + (val||0) + '</span>';
   }
   const id = 'plan_' + section + '_' + mi + '_' + key;
