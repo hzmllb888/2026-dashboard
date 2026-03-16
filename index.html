@@ -120,7 +120,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
   <div class="kpi-cards" id="kpiCards"></div>
   <div class="summary-grid">
     <div class="card">
-      <div class="card-title">国内月度进度追踪 <span class="badge badge-blue">保底KPI 3,622条</span></div>
+      <div class="card-title">国内月度进度追踪 <span class="badge badge-blue" id="dashDomBadge">保底KPI</span></div>
       <div style="overflow-x:auto"><table id="dashDomestic"></table></div>
     </div>
     <div class="card">
@@ -137,7 +137,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
 <!-- Panel 1: Domestic Monthly -->
 <div class="panel" id="panel1">
   <div class="card">
-    <div class="card-title">国内工厂流量项目月度线索计划 <span class="badge badge-blue">保底3,622 / 挑战4,165</span></div>
+    <div class="card-title">国内工厂流量项目月度线索计划 <span class="badge badge-blue" id="domesticBadge">保底/挑战 自动计算</span></div>
     <div class="legend">
       <span style="background:#fffde7;padding:2px 8px;border-radius:3px">黄色底 = 可编辑(实际数据)</span>
       <span>数据修改后自动计算达成率、累计值，并同步到所有看板</span>
@@ -291,6 +291,13 @@ let actualData = JSON.parse(localStorage.getItem('budget2026_actual') || 'null')
 };
 // Ensure overseas field exists for saved data missing it
 actualData.domestic.forEach(d => { if (d.overseas === undefined) d.overseas = 0; });
+// Ensure challenge_ratio exists (for linking challenge = baodi * ratio)
+DATA.domestic.forEach(d => {
+  if (d.challenge_ratio === undefined) {
+    const baodi = (d.dy_target||0) + (d.xhs_target||0) + (d.sph_target||0);
+    d.challenge_ratio = baodi > 0 && d.challenge > 0 ? +(d.challenge / baodi).toFixed(4) : 1.15;
+  }
+});
 
 function save() {
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
@@ -362,7 +369,7 @@ function getCumulActual(mi) {
 }
 function getCumulTarget(mi) {
   let sum = 0;
-  for (let i = 0; i <= mi; i++) sum += DATA.domestic[i].baodi;
+  for (let i = 0; i <= mi; i++) sum += getComputedBaodi(i);
   return sum;
 }
 function getTotalActualDomestic() {
@@ -377,14 +384,14 @@ function getTotalActualTK() {
 function renderKPI() {
   const totalActDom = getTotalActualDomestic();
   const totalActTK = getTotalActualTK();
-  let totalBaodi = 0, totalChallenge = 0;
-  DATA.domestic.forEach(d => { totalBaodi += d.baodi; totalChallenge += d.challenge; });
+  const totalBaodi = getTotalBaodi();
+  const totalChallenge = getTotalChallenge();
   const totalCost = 833140;
   const domRate = totalBaodi > 0 ? (totalActDom/totalBaodi*100) : 0;
 
   const cards = [
     {label:'国内线索(保底)', value: fmt(totalBaodi)+'条', sub:'实际: '+fmt(totalActDom)+' | 达成: '+domRate.toFixed(1)+'%', color:'#1565c0'},
-    {label:'国内线索(挑战)', value: fmt(totalChallenge)+'条', sub:'挑战目标 +15%', color:'#6a1b9a'},
+    {label:'国内线索(挑战)', value: fmt(totalChallenge)+'条', sub:'挑战目标 ≈+15%', color:'#6a1b9a'},
     {label:'国外TK(估算)', value:'3,277~3,727条', sub:'实际: '+fmt(totalActTK)+'条', color:'#2e7d32'},
     {label:'固定年度预算', value: fmtY(totalCost), sub:'月均: '+fmtY(Math.round(totalCost/12))+' | 不含浮动设备', color:'#e65100'},
     {label:'团队规模', value:'5人', sub:'月人力成本: '+fmtY(40100), color:'#00695c'},
@@ -408,37 +415,45 @@ function getLastFilledMonth() {
 }
 function renderDashDomestic() {
   const lastFilled = getLastFilledMonth();
+  const totalBaodi = getTotalBaodi();
   let html = '<tr><th>月份</th><th>目标(保底)</th><th>本月实际</th><th>达成率</th><th>累计目标</th><th>累计实际</th><th>年度进度</th></tr>';
+  let cumBaodi = 0;
   for (let i = 0; i < 12; i++) {
     const d = DATA.domestic[i];
+    const baodi = getComputedBaodi(i);
+    cumBaodi += baodi;
     const act = getActualDomestic(i);
     const filled = hasActualDomestic(i);
-    const cumT = getCumulTarget(i);
     const cumA = getCumulActual(i);
     const showCumA = i <= lastFilled && lastFilled >= 0;
-    const yearlyTarget = 3622;
-    const yearProgress = (showCumA && yearlyTarget > 0) ? (cumA/yearlyTarget*100) : 0;
-    const rate = (d.baodi > 0 && filled) ? (act/d.baodi*100) : 0;
+    const yearProgress = (showCumA && totalBaodi > 0) ? (cumA/totalBaodi*100) : 0;
+    const rate = (baodi > 0 && filled) ? (act/baodi*100) : 0;
     const sc = filled ? statusClass(rate) : '';
-    html += `<tr><td><b>${d.month}</b></td><td>${fmt(d.baodi)}</td><td style="font-weight:600">${filled?fmt(act):'—'}</td><td class="${sc}">${filled?rate.toFixed(1)+'%':'—'}</td><td>${fmt(cumT)}</td><td>${showCumA?fmt(cumA):'—'}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(yearProgress,100)}%;background:${yearProgress>=80?'#2e7d32':yearProgress>=50?'#f57f17':'#1565c0'}"></div></div><span style="font-size:10px;color:#666">${showCumA?yearProgress.toFixed(1)+'%':'—'}</span></td></tr>`;
+    html += `<tr><td><b>${d.month}</b></td><td>${fmt(baodi)}</td><td style="font-weight:600">${filled?fmt(act):'—'}</td><td class="${sc}">${filled?rate.toFixed(1)+'%':'—'}</td><td>${fmt(cumBaodi)}</td><td>${showCumA?fmt(cumA):'—'}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(yearProgress,100)}%;background:${yearProgress>=80?'#2e7d32':yearProgress>=50?'#f57f17':'#1565c0'}"></div></div><span style="font-size:10px;color:#666">${showCumA?yearProgress.toFixed(1)+'%':'—'}</span></td></tr>`;
   }
   const totalAct = getTotalActualDomestic();
   const anyFilled = lastFilled >= 0;
-  html += `<tr class="total-row"><td>全年</td><td>3,622</td><td>${anyFilled?fmt(totalAct):'—'}</td><td>${anyFilled?pct(totalAct,3622):'—'}</td><td>3,622</td><td>${anyFilled?fmt(totalAct):'—'}</td><td></td></tr>`;
+  html += `<tr class="total-row"><td>全年</td><td>${fmt(totalBaodi)}</td><td>${anyFilled?fmt(totalAct):'—'}</td><td>${anyFilled?pct(totalAct,totalBaodi):'—'}</td><td>${fmt(totalBaodi)}</td><td>${anyFilled?fmt(totalAct):'—'}</td><td></td></tr>`;
   document.getElementById('dashDomestic').innerHTML = html;
+  const db = document.getElementById('dashDomBadge');
+  if (db) db.textContent = '保底KPI ' + fmt(totalBaodi) + '条';
 }
 
 function renderDashTK() {
+  const totalLow = getTotalTKLow();
+  const totalHigh = getTotalTKHigh();
   let html = '<tr><th>月份</th><th>目标(低)</th><th>目标(高)</th><th>实际</th><th>达成率</th></tr>';
   for (let i = 0; i < 12; i++) {
     const t = DATA.tk[i];
+    const low = getComputedTKLow(i);
+    const high = getComputedTKHigh(i);
     const act = actualData.tk[i] || 0;
-    const rate = t.low > 0 ? (act/t.low*100) : 0;
+    const rate = low > 0 ? (act/low*100) : 0;
     const sc = act ? statusClass(rate) : '';
-    html += `<tr><td><b>${t.month}</b></td><td>${fmt(t.low)}</td><td>${fmt(t.high)}</td><td style="font-weight:600">${act||'—'}</td><td class="${sc}">${act?pct(act,t.low):'—'}</td></tr>`;
+    html += `<tr><td><b>${t.month}</b></td><td>${fmt(low)}</td><td>${fmt(high)}</td><td style="font-weight:600">${act||'—'}</td><td class="${sc}">${act?pct(act,low):'—'}</td></tr>`;
   }
   const totalAct = getTotalActualTK();
-  html += `<tr class="total-row"><td>全年</td><td>3,277</td><td>3,727</td><td>${totalAct||'—'}</td><td>${totalAct?pct(totalAct,3277):'—'}</td></tr>`;
+  html += `<tr class="total-row"><td>全年</td><td>${fmt(totalLow)}</td><td>${fmt(totalHigh)}</td><td>${totalAct||'—'}</td><td>${totalAct?pct(totalAct,totalLow):'—'}</td></tr>`;
   document.getElementById('dashTK').innerHTML = html;
 }
 
@@ -453,36 +468,101 @@ function renderCostBars() {
   document.getElementById('costBars').innerHTML = html;
 }
 
+// Compute linked domestic data
+function getComputedPhones() {
+  const phones = [];
+  phones[0] = DATA.domestic[0].phones; // base month
+  for (let i = 1; i < 12; i++) {
+    phones[i] = phones[i-1] + (DATA.domestic[i].newPhones || 0);
+  }
+  return phones;
+}
+function getComputedBaodi(i) {
+  return (DATA.domestic[i].dy_target||0) + (DATA.domestic[i].xhs_target||0) + (DATA.domestic[i].sph_target||0);
+}
+function getComputedChallenge(i) {
+  return Math.round(getComputedBaodi(i) * (DATA.domestic[i].challenge_ratio || 1.15));
+}
+function getTotalBaodi() {
+  let s=0; for(let i=0;i<12;i++) s+=getComputedBaodi(i); return s;
+}
+function getTotalChallenge() {
+  let s=0; for(let i=0;i<12;i++) s+=getComputedChallenge(i); return s;
+}
+
 function renderDomesticTable() {
   const months = DATA.months;
+  const computedPhones = getComputedPhones();
+  // Sync computed values back into DATA for other functions
+  for (let i=0;i<12;i++) {
+    DATA.domestic[i].phones = computedPhones[i];
+    DATA.domestic[i].baodi = getComputedBaodi(i);
+    DATA.domestic[i].challenge = getComputedChallenge(i);
+  }
+
   let html = '<tr><th>指标</th>';
   months.forEach(m => html += `<th>${m}</th>`);
   html += '<th>全年</th></tr>';
 
-  const rows = [
-    {label:'手机总台数', key:'phones', sum:false},
-    {label:'本月新增手机', key:'newPhones', sum:true},
+  // Row: 手机总台数 (computed, read-only)
+  html += '<tr><td class="row-header">手机总台数</td>';
+  months.forEach((m,i) => {
+    if (i === 0) {
+      html += '<td>' + planInp('domestic', 0, 'phones', computedPhones[0]) + '</td>';
+    } else {
+      html += `<td style="font-weight:600;background:#e8eaf6">${fmt(computedPhones[i])}</td>`;
+    }
+  });
+  html += '<td class="total-row">—</td></tr>';
+
+  // Row: 本月新增手机 (editable)
+  let totalNew = 0;
+  html += '<tr><td class="row-header">本月新增手机</td>';
+  months.forEach((m,i) => {
+    totalNew += (DATA.domestic[i].newPhones||0);
+    html += '<td>' + planInp('domestic', i, 'newPhones', DATA.domestic[i].newPhones) + '</td>';
+  });
+  html += `<td class="total-row">${fmt(totalNew)}</td></tr>`;
+
+  // Editable rows
+  const editRows = [
     {label:'抖音运营账号', key:'dy_acc', sum:false},
     {label:'小红书运营账号', key:'xhs_acc', sum:false},
     {label:'视频号运营账号', key:'sph_acc', sum:false},
     {label:'抖音目标', key:'dy_target', sum:true},
     {label:'小红书目标', key:'xhs_target', sum:true},
     {label:'视频号目标', key:'sph_target', sum:true},
-    {label:'保底合计', key:'baodi', sum:true, cls:'highlight'},
-    {label:'挑战合计', key:'challenge', sum:true, cls:'highlight'},
   ];
-
-  rows.forEach(r => {
+  editRows.forEach(r => {
     let total = 0;
-    html += `<tr${r.cls?' class="'+r.cls+'"':''}><td class="row-header">${r.label}</td>`;
+    html += `<tr><td class="row-header">${r.label}</td>`;
     months.forEach((m,i) => {
       const v = DATA.domestic[i][r.key];
       if (r.sum && typeof v === 'number') total += v;
-      else if (!r.sum) total = '—';
       html += '<td>' + planInp('domestic', i, r.key, v) + '</td>';
     });
     html += `<td class="total-row">${r.sum ? fmt(total) : '—'}</td></tr>`;
   });
+
+  // Row: 保底合计 (computed = 抖音+小红书+视频号目标, read-only)
+  let totalBaodi = 0;
+  html += '<tr class="highlight"><td class="row-header">保底合计</td>';
+  months.forEach((m,i) => {
+    const v = getComputedBaodi(i);
+    totalBaodi += v;
+    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
+  });
+  html += `<td class="total-row" style="font-weight:700">${fmt(totalBaodi)}</td></tr>`;
+
+  // Row: 挑战合计 (computed = 保底 x 挑战系数, read-only)
+  let totalChallenge = 0;
+  html += '<tr class="highlight"><td class="row-header">挑战合计</td>';
+  months.forEach((m,i) => {
+    const v = getComputedChallenge(i);
+    totalChallenge += v;
+    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
+  });
+  html += `<td class="total-row" style="font-weight:700">${fmt(totalChallenge)}</td></tr>`;
 
   // Actual input rows
   ['抖音实际','小红书实际','视频号实际','海外线索实际'].forEach((label, pi) => {
@@ -508,21 +588,22 @@ function renderDomesticTable() {
   });
   html += `<td>${grandTotal||'—'}</td></tr>`;
 
-  // 达成率
+  // 达成率 (uses computed baodi)
   html += '<tr><td class="row-header">达成率(实/保底)</td>';
   months.forEach((m,i) => {
     const act = getActualDomestic(i);
-    const target = DATA.domestic[i].baodi;
+    const target = getComputedBaodi(i);
     const rate = target > 0 && act > 0 ? (act/target*100) : 0;
     const sc = act ? statusClass(rate) : '';
     html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
   });
-  html += `<td class="${grandTotal?statusClass(grandTotal/3622*100):''}">${grandTotal?pct(grandTotal,3622):'—'}</td></tr>`;
+  html += `<td class="${grandTotal?statusClass(grandTotal/totalBaodi*100):''}">${grandTotal?pct(grandTotal,totalBaodi):'—'}</td></tr>`;
 
-  // Cumulative
+  // Cumulative (uses computed baodi)
   html += '<tr class="highlight"><td class="row-header">累计目标(保底)</td>';
-  months.forEach((m,i) => html += `<td>${fmt(getCumulTarget(i))}</td>`);
-  html += '<td>3,622</td></tr>';
+  let cumBaodi = 0;
+  months.forEach((m,i) => { cumBaodi += getComputedBaodi(i); html += `<td>${fmt(cumBaodi)}</td>`; });
+  html += `<td>${fmt(totalBaodi)}</td></tr>`;
 
   const lastFilledDom = getLastFilledMonth();
   html += '<tr class="highlight"><td class="row-header">累计实际</td>';
@@ -534,12 +615,35 @@ function renderDomesticTable() {
   html += `<td>${lastFilledDom>=0?fmt(grandTotal):'—'}</td></tr>`;
 
   document.getElementById('domesticTable').innerHTML = html;
+  // Update badge with computed totals
+  const badge = document.getElementById('domesticBadge');
+  if (badge) badge.textContent = '保底 ' + fmt(totalBaodi) + ' / 挑战 ' + fmt(totalChallenge);
 }
+
+// Compute TK totals
+function getComputedTKLow(i) {
+  const t = DATA.tk[i];
+  const uk = typeof t.uk === 'number' ? t.uk : 0;
+  return (t.us_low||0) + uk;
+}
+function getComputedTKHigh(i) {
+  const t = DATA.tk[i];
+  const uk = typeof t.uk === 'number' ? t.uk : 0;
+  return (t.us_high||0) + uk;
+}
+function getTotalTKLow() { let s=0; for(let i=0;i<12;i++) s+=getComputedTKLow(i); return s; }
+function getTotalTKHigh() { let s=0; for(let i=0;i<12;i++) s+=getComputedTKHigh(i); return s; }
 
 function renderTKTable() {
   let html = '<tr><th>指标</th>';
   DATA.months.forEach(m => html += `<th>${m}</th>`);
   html += '<th>全年</th></tr>';
+
+  // Sync computed low/high back
+  for(let i=0;i<12;i++) {
+    DATA.tk[i].low = getComputedTKLow(i);
+    DATA.tk[i].high = getComputedTKHigh(i);
+  }
 
   const tkRows = [
     {label:'手机台数', key:'phones'},
@@ -549,7 +653,7 @@ function renderTKTable() {
   ];
   tkRows.forEach(r => {
     let total = 0;
-    html += `<tr${r.cls?' class="'+r.cls+'"':''}><td class="row-header">${r.label}</td>`;
+    html += '<tr><td class="row-header">' + r.label + '</td>';
     DATA.tk.forEach((t,i) => {
       const v = t[r.key];
       if (r.sum && typeof v === 'number') total += v;
@@ -557,6 +661,26 @@ function renderTKTable() {
     });
     html += `<td class="total-row">${r.sum?fmt(total):'—'}</td></tr>`;
   });
+
+  // Computed low total (us_low + uk, read-only)
+  let totalLow = 0;
+  html += '<tr class="highlight"><td class="row-header">月合计(低)</td>';
+  DATA.months.forEach((m,i) => {
+    const v = getComputedTKLow(i);
+    totalLow += v;
+    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
+  });
+  html += `<td class="total-row" style="font-weight:700">${fmt(totalLow)}</td></tr>`;
+
+  // Computed high total (us_high + uk, read-only)
+  let totalHigh = 0;
+  html += '<tr class="highlight"><td class="row-header">月合计(高)</td>';
+  DATA.months.forEach((m,i) => {
+    const v = getComputedTKHigh(i);
+    totalHigh += v;
+    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
+  });
+  html += `<td class="total-row" style="font-weight:700">${fmt(totalHigh)}</td></tr>`;
 
   // Actual
   html += '<tr style="background:#fffde7"><td class="row-header">实际填写</td>';
@@ -569,16 +693,16 @@ function renderTKTable() {
   });
   html += `<td class="total-row">${tkTotal||'—'}</td></tr>`;
 
-  // 达成率
+  // 达成率 (uses computed low)
   html += '<tr><td class="row-header">达成率(实/低目标)</td>';
   DATA.months.forEach((m,i) => {
     const act = actualData.tk[i] || 0;
-    const target = DATA.tk[i].low;
+    const target = getComputedTKLow(i);
     const rate = target > 0 && act > 0 ? (act/target*100) : 0;
     const sc = act ? statusClass(rate) : '';
     html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
   });
-  html += `<td>${tkTotal?pct(tkTotal,3277):'—'}</td></tr>`;
+  html += `<td>${tkTotal?pct(tkTotal,totalLow):'—'}</td></tr>`;
 
   document.getElementById('tkTable').innerHTML = html;
 }
@@ -768,10 +892,12 @@ function renderBudget() {
 function renderPerformance() {
   const p = DATA.perf;
   const totalAct = getTotalActualDomestic();
+  const compBaodi = getTotalBaodi();
+  const compChallenge = getTotalChallenge();
 
   // Use actual if available, otherwise use targets
-  const scenA_leads = totalAct || p.baodi;
-  const scenB_leads = totalAct || p.challenge;
+  const scenA_leads = totalAct || compBaodi;
+  const scenB_leads = totalAct || compChallenge;
   const useActual = totalAct > 0;
 
   const baseCost = 833140;
@@ -790,11 +916,11 @@ function renderPerformance() {
     return {leads, precise, orders, revenue, newProfit, totalProfit, totalCost, netProfit};
   };
 
-  const a = calc(p.baodi, 0);
-  const b = calc(p.challenge, 0);
+  const a = calc(compBaodi, 0);
+  const b = calc(compChallenge, 0);
   const act = useActual ? calc(totalAct, 0) : null;
 
-  let html = '<tr><th>推导步骤</th><th>情景A：保底 3,622条</th><th>情景B：挑战 4,165条</th>';
+  let html = '<tr><th>推导步骤</th><th>情景A：保底 '+fmt(compBaodi)+'条</th><th>情景B：挑战 '+fmt(compChallenge)+'条</th>';
   if (act) html += '<th style="background:#e8f5e9">实际推算</th>';
   html += '</tr>';
 
