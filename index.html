@@ -78,6 +78,24 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
 .login-error{color:#c62828;font-size:12px;margin-top:10px;display:none}
 .hidden-by-role{display:none!important}
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCvzOw4odJnhPesgHwZ_kZ1ZEhlEF_X9Xk",
+    authDomain: "budget-dashboard-2026.firebaseapp.com",
+    databaseURL: "https://budget-dashboard-2026-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "budget-dashboard-2026",
+    storageBucket: "budget-dashboard-2026.firebasestorage.app",
+    messagingSenderId: "282058745586",
+    appId: "1:282058745586:web:7b24c60e7cef4c4b91926b"
+  });
+  const db = firebase.database();
+  const planRef = db.ref('budget2026/plan');
+  const actualRef = db.ref('budget2026/actual');
+  const versionRef = db.ref('budget2026/version');
+</script>
 </head>
 <body>
 
@@ -382,12 +400,111 @@ DATA.domestic.forEach(d => {
   }
 });
 
+// ===== Firebase 实时同步 =====
+let firebaseReady = false;
+let skipNextFirebaseRender = false;
+
 function save() {
+  // 1. 本地缓存（即时）
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
   localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
+  // 2. 云端同步（异步）
+  skipNextFirebaseRender = true; // 防止自己的写入触发重复渲染
+  planRef.set(JSON.parse(JSON.stringify(DATA))).catch(err => {
+    console.error('Firebase plan save failed:', err);
+    showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
+  });
+  actualRef.set(JSON.parse(JSON.stringify(actualData))).catch(err => {
+    console.error('Firebase actual save failed:', err);
+    showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
+  });
+  showSyncStatus('✓ 已同步云端', '#2e7d32');
+}
+
+function showSyncStatus(msg, color) {
   const ind = document.getElementById('syncIndicator');
+  ind.textContent = msg;
+  ind.style.background = color || '#2e7d32';
   ind.classList.add('show');
-  setTimeout(() => ind.classList.remove('show'), 1500);
+  setTimeout(() => ind.classList.remove('show'), 2000);
+}
+
+function initFirebase() {
+  // 监听计划数据变化（其他人的修改会实时推送过来）
+  planRef.on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      if (skipNextFirebaseRender) { skipNextFirebaseRender = false; return; }
+      // 用云端数据覆盖本地
+      Object.keys(val).forEach(k => { DATA[k] = val[k]; });
+      // 确保计算字段存在
+      DATA.domestic.forEach(d => {
+        if (d.challenge_ratio === undefined) {
+          const b = (d.dy_target||0)+(d.xhs_target||0)+(d.sph_target||0);
+          d.challenge_ratio = b > 0 ? 1.15 : 1.15;
+        }
+        if (d.overseas === undefined) d.overseas = 0;
+      });
+      localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
+      safeRenderAll();
+    } else if (!firebaseReady) {
+      // Firebase 是空的，上传默认数据作为种子
+      planRef.set(JSON.parse(JSON.stringify(DEFAULT_DATA)));
+    }
+    firebaseReady = true;
+  });
+
+  // 监听实际数据变化
+  actualRef.on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      if (skipNextFirebaseRender) return;
+      // 合并云端数据
+      if (val.domestic) {
+        actualData.domestic = val.domestic;
+        actualData.domestic.forEach(d => { if (d.overseas === undefined) d.overseas = 0; });
+      }
+      if (val.tk) actualData.tk = val.tk;
+      if (val.ecom) actualData.ecom = val.ecom;
+      if (val.train) actualData.train = val.train;
+      localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
+      safeRenderAll();
+    } else if (!firebaseReady) {
+      actualRef.set(JSON.parse(JSON.stringify(actualData)));
+    }
+  });
+
+  // 版本控制：代码更新时同步新默认数据到云端
+  versionRef.once('value', (snapshot) => {
+    const fbVer = snapshot.val() || 0;
+    if (DATA_VERSION > fbVer) {
+      planRef.set(JSON.parse(JSON.stringify(DEFAULT_DATA)));
+      versionRef.set(DATA_VERSION);
+      console.log('Firebase数据版本升级: v'+fbVer+' → v'+DATA_VERSION);
+    }
+  });
+
+  // 连接状态监控
+  db.ref('.info/connected').on('value', (snap) => {
+    if (snap.val() === true) {
+      showSyncStatus('✓ 已连接云端', '#2e7d32');
+    } else {
+      const ind = document.getElementById('syncIndicator');
+      ind.textContent = '⚠ 离线模式 - 数据保存在本地';
+      ind.style.background = '#e65100';
+      ind.classList.add('show');
+    }
+  });
+}
+
+// 安全渲染：如果用户正在输入则延迟
+function safeRenderAll() {
+  const active = document.activeElement;
+  if (active && (active.classList.contains('cell-input') || active.tagName === 'INPUT')) {
+    active.addEventListener('blur', () => renderAll(), { once: true });
+    return;
+  }
+  renderAll();
 }
 function updatePlan(el) {
   const section = el.dataset.section;
@@ -1214,6 +1331,7 @@ function renderAll() {
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN');
 document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
 renderAll();
+initFirebase(); // 启动Firebase实时同步
 </script>
 </body>
 </html>
