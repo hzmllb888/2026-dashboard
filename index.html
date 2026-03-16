@@ -63,10 +63,31 @@ td{font-size:12px}
 .perf-table td.pos{color:#2e7d32}
 input.cell-input{width:60px;border:1px solid #bbb;border-radius:3px;padding:2px 4px;text-align:center;font-size:12px;background:#fffde7}
 input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a237e,#283593);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#fff;border-radius:12px;padding:40px;width:360px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.login-box h2{font-size:20px;color:#1a237e;margin-bottom:6px}
+.login-box p{font-size:13px;color:#666;margin-bottom:24px}
+.login-box input{width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;text-align:center;letter-spacing:4px;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:#1a237e}
+.login-box button{width:100%;padding:12px;margin-top:16px;background:#1a237e;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+.login-box button:hover{background:#283593}
+.login-error{color:#c62828;font-size:12px;margin-top:10px;display:none}
+.hidden-by-role{display:none!important}
 </style>
 </head>
 <body>
 
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>2026年流量部门看板</h2>
+    <p>请输入访问密码</p>
+    <input type="password" id="loginPwd" placeholder="请输入密码" maxlength="10" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">进 入</button>
+    <div class="login-error" id="loginError">密码错误，请重新输入</div>
+  </div>
+</div>
+
+<div id="mainContent" style="display:none">
 <div class="header">
   <div>
     <h1>2026年流量部门 预算与项目推进看板</h1>
@@ -102,7 +123,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
       <div style="overflow-x:auto"><table id="dashTK"></table></div>
     </div>
   </div>
-  <div class="card">
+  <div class="card" id="costSection">
     <div class="card-title">全年成本结构一览 <span class="badge badge-orange">固定预算 ¥871,640</span></div>
     <div style="padding:16px" id="costBars"></div>
   </div>
@@ -183,7 +204,42 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
 
 </div>
 
+</div><!-- end mainContent -->
+
 <div class="sync-indicator" id="syncIndicator">数据已同步保存</div>
+
+<script>
+// ===== ACCESS CONTROL =====
+let userRole = null; // 'staff' or 'admin'
+
+function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  if (pwd === '666666') {
+    userRole = 'staff';
+  } else if (pwd === '987654') {
+    userRole = 'admin';
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPwd').value = '';
+    document.getElementById('loginPwd').focus();
+    return;
+  }
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+  applyPermissions();
+}
+
+function applyPermissions() {
+  const tabs = document.querySelectorAll('.tab');
+  if (userRole === 'staff') {
+    // Staff: only tabs 0(dashboard), 1(domestic), 2(TK)
+    tabs.forEach((t, i) => { if (i > 2) t.classList.add('hidden-by-role'); });
+    // Hide cost structure in dashboard
+    document.getElementById('costSection').classList.add('hidden-by-role');
+  }
+  // Admin: everything visible (default)
+}
+</script>
 
 <script>
 // ===== DATA =====
@@ -215,6 +271,7 @@ function statusClass(rate) {
 }
 
 function switchTab(idx) {
+  if (userRole === 'staff' && idx > 2) return;
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
   document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
 }
