@@ -278,7 +278,90 @@ function applyPermissions() {
 
 <script>
 // ===== DATA =====
-const DEFAULT_DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":83,"newPhones":30,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":100,"newPhones":17,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":100,"newPhones":0,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":30,"leads":30},{"month":"6月","phones":30,"leads":35},{"month":"7月","phones":30,"leads":40},{"month":"8月","phones":30,"leads":45},{"month":"9月","phones":30,"leads":45},{"month":"10月","phones":30,"leads":35},{"month":"11月","phones":30,"leads":45},{"month":"12月","phones":30,"leads":48}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":30,"leads":15},{"month":"7月","phones":30,"leads":25},{"month":"8月","phones":30,"leads":30},{"month":"9月","phones":30,"leads":30},{"month":"10月","phones":30,"leads":22},{"month":"11月","phones":30,"leads":30},{"month":"12月","phones":30,"leads":35}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本(已确定)","amt":30800},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
+const DATA_VERSION = 2; // 每次更新默认数据时递增此版本号，强制所有浏览器同步最新数据
+const DEFAULT_DATA = {
+  "months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
+  "domestic":[
+    {"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42},
+    {"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15},
+    {"month":"3月","phones":53,"newPhones":20,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54},
+    {"month":"4月","phones":73,"newPhones":10,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64},
+    {"month":"5月","phones":83,"newPhones":0,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67},
+    {"month":"6月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74},
+    {"month":"7月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76},
+    {"month":"8月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76},
+    {"month":"9月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76},
+    {"month":"10月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50},
+    {"month":"11月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76},
+    {"month":"12月","phones":83,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76}
+  ],
+  "tk":[
+    {"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中"},
+    {"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中"},
+    {"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5},
+    {"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15},
+    {"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20},
+    {"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25},
+    {"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30},
+    {"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30},
+    {"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28},
+    {"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22},
+    {"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30},
+    {"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32}
+  ],
+  "ecom":[
+    {"month":"1月","phones":0,"leads":0},
+    {"month":"2月","phones":0,"leads":0},
+    {"month":"3月","phones":10,"leads":0},
+    {"month":"4月","phones":10,"leads":0},
+    {"month":"5月","phones":10,"leads":15},
+    {"month":"6月","phones":30,"leads":30},
+    {"month":"7月","phones":30,"leads":35},
+    {"month":"8月","phones":30,"leads":40},
+    {"month":"9月","phones":30,"leads":40},
+    {"month":"10月","phones":30,"leads":30},
+    {"month":"11月","phones":30,"leads":40},
+    {"month":"12月","phones":30,"leads":45}
+  ],
+  "train":[
+    {"month":"1月","phones":0,"leads":0},
+    {"month":"2月","phones":0,"leads":0},
+    {"month":"3月","phones":0,"leads":0},
+    {"month":"4月","phones":0,"leads":0},
+    {"month":"5月","phones":10,"leads":0},
+    {"month":"6月","phones":10,"leads":10},
+    {"month":"7月","phones":30,"leads":20},
+    {"month":"8月","phones":30,"leads":25},
+    {"month":"9月","phones":30,"leads":28},
+    {"month":"10月","phones":30,"leads":22},
+    {"month":"11月","phones":30,"leads":28},
+    {"month":"12月","phones":30,"leads":30}
+  ],
+  "salary":[
+    {"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},
+    {"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},
+    {"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},
+    {"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},
+    {"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}
+  ],
+  "costs":[
+    {"name":"人力成本","amt":481200},
+    {"name":"设备成本(已确定)","amt":30800},
+    {"name":"账号基建","amt":138840},
+    {"name":"投放成本","amt":109600},
+    {"name":"新项目运营","amt":38500},
+    {"name":"学习差旅","amt":34200}
+  ],
+  "perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}
+};
+
+// 版本控制：代码更新时自动清除旧缓存，强制用最新数据
+const savedVersion = parseInt(localStorage.getItem('budget2026_version') || '0');
+if (savedVersion < DATA_VERSION) {
+  localStorage.removeItem('budget2026_plan');
+  localStorage.setItem('budget2026_version', DATA_VERSION);
+  console.log('数据版本升级 v'+savedVersion+' → v'+DATA_VERSION+'，已重置为最新默认数据');
+}
 // Load saved plan data or use defaults
 const DATA = JSON.parse(localStorage.getItem('budget2026_plan') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
 
