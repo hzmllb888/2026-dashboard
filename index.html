@@ -296,7 +296,10 @@ function applyPermissions() {
 
 <script>
 // ===== DATA =====
-const DATA_VERSION = 3; // 每次更新默认数据时递增此版本号，强制所有浏览器同步最新数据
+const DATA_VERSION = 3;
+// ★ 年度KPI锁死值 — 不管月度怎么调，全年总数不变
+const FIXED_BAODI = 3622;
+const FIXED_CHALLENGE = 4165;
 const DEFAULT_DATA = {
   "months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
   "domestic":[
@@ -712,11 +715,12 @@ function getComputedBaodi(i) {
 function getComputedChallenge(i) {
   return Math.round(getComputedBaodi(i) * (DATA.domestic[i].challenge_ratio || 1.15));
 }
-function getTotalBaodi() {
+// 全年总数永远返回锁死值
+function getTotalBaodi() { return FIXED_BAODI; }
+function getTotalChallenge() { return FIXED_CHALLENGE; }
+// 月度实际求和（用于对比）
+function getSumMonthlyBaodi() {
   let s=0; for(let i=0;i<12;i++) s+=getComputedBaodi(i); return s;
-}
-function getTotalChallenge() {
-  let s=0; for(let i=0;i<12;i++) s+=getComputedChallenge(i); return s;
 }
 
 function renderDomesticTable() {
@@ -773,25 +777,29 @@ function renderDomesticTable() {
     html += `<td class="total-row">${r.sum ? fmt(total) : '—'}</td></tr>`;
   });
 
-  // Row: 保底合计 (computed = 抖音+小红书+视频号目标, read-only)
-  let totalBaodi = 0;
+  // Row: 保底合计 (月度自动求和，全年锁死3622)
+  let sumBaodi = 0;
   html += '<tr class="highlight"><td class="row-header">保底合计</td>';
   months.forEach((m,i) => {
     const v = getComputedBaodi(i);
-    totalBaodi += v;
+    sumBaodi += v;
     html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
   });
-  html += `<td class="total-row" style="font-weight:700">${fmt(totalBaodi)}</td></tr>`;
+  const baodiDiff = sumBaodi - FIXED_BAODI;
+  const baodiWarn = baodiDiff !== 0 ? ' <span style="color:'+(baodiDiff>0?'#c62828':'#e65100')+';font-size:11px">(月度合计'+fmt(sumBaodi)+(baodiDiff>0?'，超出':'，不足')+Math.abs(baodiDiff)+')</span>' : '';
+  html += `<td class="total-row" style="font-weight:700">${fmt(FIXED_BAODI)}${baodiWarn}</td></tr>`;
 
-  // Row: 挑战合计 (computed = 保底 x 挑战系数, read-only)
-  let totalChallenge = 0;
+  // Row: 挑战合计 (月度自动求和，全年锁死4165)
+  let sumChallenge = 0;
   html += '<tr class="highlight"><td class="row-header">挑战合计</td>';
   months.forEach((m,i) => {
     const v = getComputedChallenge(i);
-    totalChallenge += v;
+    sumChallenge += v;
     html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
   });
-  html += `<td class="total-row" style="font-weight:700">${fmt(totalChallenge)}</td></tr>`;
+  const challengeDiff = sumChallenge - FIXED_CHALLENGE;
+  const challengeWarn = challengeDiff !== 0 ? ' <span style="color:'+(challengeDiff>0?'#c62828':'#e65100')+';font-size:11px">(月度合计'+fmt(sumChallenge)+(challengeDiff>0?'，超出':'，不足')+Math.abs(challengeDiff)+')</span>' : '';
+  html += `<td class="total-row" style="font-weight:700">${fmt(FIXED_CHALLENGE)}${challengeWarn}</td></tr>`;
 
   // Actual input rows
   ['抖音实际','小红书实际','视频号实际','海外线索实际'].forEach((label, pi) => {
@@ -826,13 +834,13 @@ function renderDomesticTable() {
     const sc = act ? statusClass(rate) : '';
     html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
   });
-  html += `<td class="${grandTotal?statusClass(grandTotal/totalBaodi*100):''}">${grandTotal?pct(grandTotal,totalBaodi):'—'}</td></tr>`;
+  html += `<td class="${grandTotal?statusClass(grandTotal/FIXED_BAODI*100):''}">${grandTotal?pct(grandTotal,FIXED_BAODI):'—'}</td></tr>`;
 
   // Cumulative (uses computed baodi)
   html += '<tr class="highlight"><td class="row-header">累计目标(保底)</td>';
   let cumBaodi = 0;
   months.forEach((m,i) => { cumBaodi += getComputedBaodi(i); html += `<td>${fmt(cumBaodi)}</td>`; });
-  html += `<td>${fmt(totalBaodi)}</td></tr>`;
+  html += `<td>${fmt(FIXED_BAODI)}</td></tr>`;
 
   const lastFilledDom = getLastFilledMonth();
   html += '<tr class="highlight"><td class="row-header">累计实际</td>';
@@ -844,9 +852,9 @@ function renderDomesticTable() {
   html += `<td>${lastFilledDom>=0?fmt(grandTotal):'—'}</td></tr>`;
 
   document.getElementById('domesticTable').innerHTML = html;
-  // Update badge with computed totals
+  // Badge永远显示锁死值
   const badge = document.getElementById('domesticBadge');
-  if (badge) badge.textContent = '保底 ' + fmt(totalBaodi) + ' / 挑战 ' + fmt(totalChallenge);
+  if (badge) badge.textContent = '保底 ' + fmt(FIXED_BAODI) + ' / 挑战 ' + fmt(FIXED_CHALLENGE);
 }
 
 // Compute TK totals
