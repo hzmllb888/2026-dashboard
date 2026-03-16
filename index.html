@@ -253,11 +253,13 @@ const DATA = JSON.parse(localStorage.getItem('budget2026_plan') || 'null') || JS
 
 // Actual data storage (persisted to localStorage)
 let actualData = JSON.parse(localStorage.getItem('budget2026_actual') || 'null') || {
-  domestic: Array(12).fill(null).map(() => ({dy:0,xhs:0,sph:0})),
+  domestic: Array(12).fill(null).map(() => ({dy:0,xhs:0,sph:0,overseas:0})),
   tk: Array(12).fill(0),
   ecom: Array(12).fill(0),
   train: Array(12).fill(0),
 };
+// Ensure overseas field exists for saved data missing it
+actualData.domestic.forEach(d => { if (d.overseas === undefined) d.overseas = 0; });
 
 function save() {
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
@@ -320,7 +322,7 @@ function switchTab(idx) {
 
 function getActualDomestic(mi) {
   const a = actualData.domestic[mi];
-  return (a.dy||0) + (a.xhs||0) + (a.sph||0);
+  return (a.dy||0) + (a.xhs||0) + (a.sph||0) + (a.overseas||0);
 }
 function getCumulActual(mi) {
   let sum = 0;
@@ -367,7 +369,7 @@ function renderKPI() {
 
 function hasActualDomestic(mi) {
   const a = actualData.domestic[mi];
-  return (a.dy||0) > 0 || (a.xhs||0) > 0 || (a.sph||0) > 0;
+  return (a.dy||0) > 0 || (a.xhs||0) > 0 || (a.sph||0) > 0 || (a.overseas||0) > 0;
 }
 function getLastFilledMonth() {
   for (let i = 11; i >= 0; i--) { if (hasActualDomestic(i)) return i; }
@@ -452,8 +454,8 @@ function renderDomesticTable() {
   });
 
   // Actual input rows
-  ['抖音实际','小红书实际','视频号实际'].forEach((label, pi) => {
-    const keys = ['dy','xhs','sph'];
+  ['抖音实际','小红书实际','视频号实际','海外线索实际'].forEach((label, pi) => {
+    const keys = ['dy','xhs','sph','overseas'];
     let total = 0;
     html += `<tr style="background:#fffde7"><td class="row-header">${label}</td>`;
     months.forEach((m,i) => {
