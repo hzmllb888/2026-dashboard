@@ -831,102 +831,100 @@ function renderPerformance() {
 }
 
 function renderDeviceStats() {
-  // === 一、现有设备现状（跨平台共用） ===
-  let html = '<tr><th colspan="5" style="background:#c62828;color:#fff;padding:8px">当前问题：1台手机同时运营多个平台，账号交叉重叠</th></tr>';
-  html += '<tr><th>硬件分类</th><th>数量</th><th>当前运营平台</th><th>问题</th><th>说明</th></tr>';
-  html += '<tr><td class="row-header">安卓机</td><td style="text-align:center;font-weight:700">40</td><td>抖音 / 小红书 / 视频号 混用</td><td class="status-red">多平台挤在同一手机</td><td>荣耀/红米等机型</td></tr>';
-  html += '<tr><td class="row-header">苹果机</td><td style="text-align:center;font-weight:700">13</td><td>抖音 / 小红书 / 视频号 混用</td><td class="status-red">多平台挤在同一手机</td><td>iPhone 11等</td></tr>';
+  // === 一、现有设备现状 ===
+  let html = '<tr><th colspan="5" style="background:#1a237e;color:#fff;padding:8px">调整前：53台手机，1台手机同时运营多个平台（账号交叉重叠）</th></tr>';
+  html += '<tr><th>硬件类型</th><th>数量</th><th>当前运营的平台</th><th>存在的问题</th><th>说明</th></tr>';
+  html += '<tr><td class="row-header">安卓机</td><td style="text-align:center;font-weight:700">40</td><td>同时跑抖音、小红书、视频号</td><td class="status-red">1台手机装3个平台的账号</td><td>荣耀/红米等</td></tr>';
+  html += '<tr><td class="row-header">苹果机</td><td style="text-align:center;font-weight:700">13</td><td>同时跑抖音、小红书、视频号</td><td class="status-red">1台手机装3个平台的账号</td><td>iPhone 11等</td></tr>';
   html += '<tr class="total-row"><td>硬件合计</td><td style="text-align:center;font-weight:700">53</td><td colspan="3">安卓40台 + 苹果13台</td></tr>';
-  html += '<tr><td colspan="5" style="background:#fff3e0;padding:6px"></td></tr>';
-  html += '<tr><th colspan="5" style="background:#1a237e;color:#fff;padding:8px">各平台账号覆盖情况（存在大量交叉重叠）</th></tr>';
-  html += '<tr><th>平台</th><th>使用手机数</th><th>占53台比例</th><th>与其他平台重叠</th><th>说明</th></tr>';
-  const platNow = [
-    ['抖音',49,'92.5%','大量手机同时跑小红书/视频号','49台手机上有抖音账号'],
-    ['小红书',43,'81.1%','与抖音/视频号共用设备','43台手机上有小红书账号'],
-    ['视频号',35,'66.0%','与抖音/小红书共用设备','35台手机上有视频号账号'],
-  ];
-  platNow.forEach(r => {
-    html += `<tr><td class="row-header" style="font-weight:600">${r[0]}</td>`;
-    html += `<td style="text-align:center;font-weight:700">${r[1]}</td>`;
-    html += `<td style="text-align:center">${r[2]}</td>`;
-    html += `<td class="status-orange">${r[3]}</td>`;
-    html += `<td>${r[4]}</td></tr>`;
-  });
-  html += '<tr class="total-row"><td>账号总覆盖</td><td style="text-align:center;font-weight:700">49+43+35=127</td><td colspan="3" class="status-red" style="font-weight:600">53台手机承载127个平台账号 → 平均每台手机跑2.4个平台，严重影响效率</td></tr>';
+  html += '<tr><td colspan="5" style="height:4px;background:#e0e0e0;padding:0"></td></tr>';
+  html += '<tr><th colspan="5" style="background:#c62828;color:#fff;padding:8px">问题：53台手机上装了127个平台账号，平均1台手机跑2.4个平台</th></tr>';
+  html += '<tr><th>平台</th><th>在多少台手机上有账号</th><th>占53台比例</th><th>说明</th><th></th></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">抖音</td><td style="text-align:center;font-weight:700">49台</td><td style="text-align:center">92.5%</td><td>49台手机上都装了抖音账号</td><td></td></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">小红书</td><td style="text-align:center;font-weight:700">43台</td><td style="text-align:center">81.1%</td><td>43台手机上都装了小红书账号</td><td></td></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">视频号</td><td style="text-align:center;font-weight:700">35台</td><td style="text-align:center">66.0%</td><td>35台手机上都装了视频号</td><td></td></tr>';
+  html += '<tr class="total-row" style="background:#ffebee"><td>合计</td><td style="text-align:center;font-weight:700">127个账号</td><td colspan="3" class="status-red" style="font-weight:600">→ 调整目标：1台手机只跑1个平台，不再交叉</td></tr>';
   document.getElementById('deviceOverview').innerHTML = html;
 
-  // === 二、3月调整规划：1台手机=1个平台 ===
-  html = '<tr><th colspan="7" style="background:#2e7d32;color:#fff;padding:8px">3月调整目标：拆分为「1台手机 = 1个平台」，彻底解决交叉操作问题</th></tr>';
-  html += '<tr><th>平台</th><th>目标专用台数</th><th>从53台中划拨</th><th>划拨来源</th><th>新购补充</th><th>到位后合计</th><th>状态</th></tr>';
-  const alloc = [
-    ['抖音（专用）',30,30,'安卓40台中划出30台',0,30,'✅ 已满编','status-green'],
-    ['评论小号',10,10,'安卓40台中剩余10台',0,10,'✅ 已满编','status-green'],
-    ['视频号（专用）',30,13,'全部13台苹果机划入','+17(SE3)',30,'✅ SE3补齐','status-green'],
-    ['小红书（专用）',30,0,'原账号从共用设备上拆出','+3(SE3)+10(3月)',13,'⏳ 先到13台','status-orange'],
-    ['电商测试',10,0,'—','+10(3月新购)',10,'✅ 3月到位','status-green'],
-  ];
-  alloc.forEach(r => {
-    html += `<tr><td class="row-header" style="font-weight:600">${r[0]}</td>`;
-    html += `<td style="text-align:center;font-weight:700">${r[1]}</td>`;
-    html += `<td style="text-align:center;font-weight:700">${r[2]}</td>`;
-    html += `<td>${r[3]}</td>`;
-    html += `<td style="text-align:center">${r[4]}</td>`;
-    html += `<td style="text-align:center;font-weight:700">${r[5]}</td>`;
-    html += `<td class="${r[7]}">${r[6]}</td></tr>`;
-  });
-  html += '<tr class="total-row"><td>合计</td><td style="text-align:center;font-weight:700">110</td><td style="text-align:center;font-weight:700">53</td><td>全部53台重新分配</td><td style="text-align:center">+40台新购</td><td style="text-align:center;font-weight:700">93(确定)</td><td class="status-orange">小红书差17台待4月定</td></tr>';
+  // === 二、3月15日新购20台 + 平台重新分配 ===
+  html = '<tr><th colspan="7" style="background:#2e7d32;color:#fff;padding:8px">3月调整计划：新购20台苹果SE3（3月15日已到位） + 53台老设备重新分配 = 1机1平台</th></tr>';
+  html += '<tr><th>平台</th><th>年度目标</th><th>设备来源</th><th>具体说明</th><th>当前到位</th><th>缺口</th><th>状态</th></tr>';
+
+  html += '<tr><td class="row-header" style="font-weight:600">抖音（专用）</td>';
+  html += '<td style="text-align:center;font-weight:700">30台</td>';
+  html += '<td style="text-align:center">老设备划拨</td>';
+  html += '<td>从40台安卓机中划出30台，只跑抖音</td>';
+  html += '<td style="text-align:center;font-weight:700">30</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-green">0</td>';
+  html += '<td class="status-green">✅ 已满编</td></tr>';
+
+  html += '<tr><td class="row-header" style="font-weight:600">评论小号</td>';
+  html += '<td style="text-align:center;font-weight:700">10台</td>';
+  html += '<td style="text-align:center">老设备划拨</td>';
+  html += '<td>40台安卓机中剩余的10台，专做评论互动</td>';
+  html += '<td style="text-align:center;font-weight:700">10</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-green">0</td>';
+  html += '<td class="status-green">✅ 已满编</td></tr>';
+
+  html += '<tr><td class="row-header" style="font-weight:600">视频号（专用）</td>';
+  html += '<td style="text-align:center;font-weight:700">30台</td>';
+  html += '<td style="text-align:center">老设备+新购</td>';
+  html += '<td>13台老苹果机 + 新购20台SE3中的17台 = 30台</td>';
+  html += '<td style="text-align:center;font-weight:700">30</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-green">0</td>';
+  html += '<td class="status-green">✅ 已满编（SE3补齐）</td></tr>';
+
+  html += '<tr style="background:#fff3e0"><td class="row-header" style="font-weight:600">小红书（专用）</td>';
+  html += '<td style="text-align:center;font-weight:700">30台</td>';
+  html += '<td style="text-align:center">新购SE3</td>';
+  html += '<td>20台SE3分完视频号后剩余3台先给小红书试用，3月底前再购10台 = 13台</td>';
+  html += '<td style="text-align:center;font-weight:700">3</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-red">缺10台(3月底购入)<br>缺17台(4月待定)</td>';
+  html += '<td class="status-orange">⏳ 先到3台，3月底到13台</td></tr>';
+
+  html += '<tr style="background:#ffebee"><td class="row-header" style="font-weight:600">电商测试</td>';
+  html += '<td style="text-align:center;font-weight:700">10台</td>';
+  html += '<td style="text-align:center">待采购</td>';
+  html += '<td>国内电商项目账号测试用，3月底前必须到位</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-red">0</td>';
+  html += '<td style="text-align:center;font-weight:700" class="status-red">缺10台</td>';
+  html += '<td class="status-red">❗ 3月底前必须到位</td></tr>';
+
+  html += '<tr class="total-row"><td>合计</td><td style="text-align:center;font-weight:700">110台</td><td></td><td></td><td style="text-align:center;font-weight:700">73</td><td style="text-align:center;font-weight:700" class="status-red">缺20台(确定)+17台(待定)</td><td></td></tr>';
   document.getElementById('platformAlloc').innerHTML = html;
 
   // === 三、采购时间线 ===
-  html = '<tr><th>时间</th><th>采购内容</th><th>数量</th><th>单价</th><th>金额</th><th>用途分配</th><th>状态</th></tr>';
-  const purchases = [
-    ['已完成','iPhone SE3',20,'¥770','¥15,400','视频号17台（补齐30台）+ 小红书试用3台','✅ 已到位'],
-    ['3月','小红书专用机',10,'¥770','¥7,700','小红书平台（累计13台）','📋 计划中'],
-    ['3月','电商测试机',10,'¥770','¥7,700','国内电商项目账号测试','📋 计划中'],
-    ['4月(待定)','小红书补充',17,'¥770','¥13,090','小红书达标30台（视账号流量情况）','⏳ 待4月中旬评估'],
-  ];
-  purchases.forEach((r,i) => {
-    const bg = i===3 ? 'background:#fff3e0' : '';
-    html += `<tr style="${bg}"><td class="row-header">${r[0]}</td><td>${r[1]}</td><td style="text-align:center;font-weight:700">${r[2]}</td><td style="text-align:center">${r[3]}</td><td style="text-align:center;font-weight:600">${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`;
-  });
-  html += '<tr class="total-row"><td>确定采购</td><td></td><td style="text-align:center;font-weight:700">40</td><td></td><td style="font-weight:700;text-align:center">¥30,800</td><td>不含4月待定17台</td><td></td></tr>';
-  html += '<tr style="background:#ffebee"><td>含待定最大</td><td></td><td style="text-align:center;font-weight:700">57</td><td></td><td style="font-weight:700;text-align:center">¥43,890</td><td>含4月小红书补充17台</td><td></td></tr>';
+  html = '<tr><th>时间</th><th>采购内容</th><th>数量</th><th>单价</th><th>金额</th><th>用途</th><th>状态</th></tr>';
+  html += '<tr style="background:#e8f5e9"><td class="row-header">3月15日</td><td>iPhone SE3</td><td style="text-align:center;font-weight:700">20台</td><td style="text-align:center">¥770</td><td style="text-align:center;font-weight:600">¥15,400</td><td>视频号补齐17台 + 小红书先到3台</td><td class="status-green">✅ 已到位</td></tr>';
+  html += '<tr style="background:#fff3e0"><td class="row-header">3月底前</td><td>iPhone（小红书）</td><td style="text-align:center;font-weight:700">10台</td><td style="text-align:center">¥770</td><td style="text-align:center;font-weight:600">¥7,700</td><td>小红书3月计划上13台（3+10）</td><td class="status-orange">📋 待采购</td></tr>';
+  html += '<tr style="background:#ffebee"><td class="row-header">3月底前</td><td>iPhone（电商测试）</td><td style="text-align:center;font-weight:700" class="status-red">10台</td><td style="text-align:center">¥770</td><td style="text-align:center;font-weight:600">¥7,700</td><td>国内电商项目账号测试</td><td class="status-red">❗ 待采购，3月底必须到位</td></tr>';
+  html += '<tr style="background:#fff3e0"><td class="row-header">4月中旬(待定)</td><td>iPhone（小红书补充）</td><td style="text-align:center;font-weight:700">17台</td><td style="text-align:center">¥770</td><td style="text-align:center;font-weight:600">¥13,090</td><td>小红书达标30台（视账号流量情况）</td><td class="status-orange">⏳ 4月中旬评估后决定</td></tr>';
+  html += '<tr class="total-row"><td>确定采购合计</td><td></td><td style="text-align:center;font-weight:700">40台</td><td></td><td style="font-weight:700;text-align:center">¥30,800</td><td colspan="2">已购20台 + 3月底待购20台</td></tr>';
+  html += '<tr style="background:#ffebee"><td>含4月待定</td><td></td><td style="text-align:center;font-weight:700">57台</td><td></td><td style="font-weight:700;text-align:center">¥43,890</td><td colspan="2">含小红书4月补充17台</td></tr>';
   document.getElementById('purchaseTimeline').innerHTML = html;
 
   // === 四、缺口分析 ===
-  html = '<tr><th>平台</th><th>目标</th><th>调整后划拨</th><th>新购补充</th><th>到位后</th><th>仍缺</th><th>解决方案</th><th>决策时间</th></tr>';
-  const gaps = [
-    ['抖音',30,30,0,30,0,'53台中划出30台安卓专用','—'],
-    ['视频号',30,13,'+17(SE3)',30,0,'13台苹果+17台新SE3补齐','✅ 已解决'],
-    ['小红书',30,0,'+3(SE3)+10(3月)',13,17,'4月中旬评估账号流量后决定是否追加','📅 4月15日前'],
-    ['评论小号',10,10,0,10,0,'剩余10台安卓专用','—'],
-    ['电商测试',10,0,'+10(3月)',10,0,'3月新购10台到位','📅 3月底前'],
-  ];
-  gaps.forEach((r,i) => {
-    const bg = r[5]>0 ? 'background:#fff3e0' : '';
-    html += `<tr style="${bg}"><td class="row-header" style="font-weight:600">${r[0]}</td>`;
-    html += `<td style="text-align:center">${r[1]}</td>`;
-    html += `<td style="text-align:center">${r[2]}</td>`;
-    html += `<td style="text-align:center">${r[3]}</td>`;
-    html += `<td style="text-align:center;font-weight:700">${r[4]}</td>`;
-    html += `<td style="text-align:center;font-weight:700" class="${r[5]>0?'status-red':'status-green'}">${r[5]>0?'-'+r[5]:'0'}</td>`;
-    html += `<td>${r[6]}</td><td>${r[7]}</td></tr>`;
-  });
+  html = '<tr><th>平台</th><th>年度目标</th><th>当前到位</th><th>3月底到位</th><th>3月底缺口</th><th>后续计划</th><th>决策节点</th></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">抖音</td><td style="text-align:center">30</td><td style="text-align:center;font-weight:700">30</td><td style="text-align:center;font-weight:700">30</td><td style="text-align:center;font-weight:700" class="status-green">0</td><td>无需采购</td><td>—</td></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">视频号</td><td style="text-align:center">30</td><td style="text-align:center;font-weight:700">30</td><td style="text-align:center;font-weight:700">30</td><td style="text-align:center;font-weight:700" class="status-green">0</td><td>无需采购</td><td>—</td></tr>';
+  html += '<tr><td class="row-header" style="font-weight:600">评论小号</td><td style="text-align:center">10</td><td style="text-align:center;font-weight:700">10</td><td style="text-align:center;font-weight:700">10</td><td style="text-align:center;font-weight:700" class="status-green">0</td><td>无需采购</td><td>—</td></tr>';
+  html += '<tr style="background:#fff3e0"><td class="row-header" style="font-weight:600">小红书</td><td style="text-align:center">30</td><td style="text-align:center;font-weight:700">3</td><td style="text-align:center;font-weight:700">13</td><td style="text-align:center;font-weight:700" class="status-red">-17</td><td>4月中旬看账号流量再定</td><td class="status-orange">📅 4月15日前</td></tr>';
+  html += '<tr style="background:#ffebee"><td class="row-header" style="font-weight:600">电商测试</td><td style="text-align:center">10</td><td style="text-align:center;font-weight:700" class="status-red">0</td><td style="text-align:center;font-weight:700">10</td><td style="text-align:center;font-weight:700" class="status-green">0</td><td class="status-red">3月底前必须采购到位</td><td class="status-red">📅 3月底</td></tr>';
   document.getElementById('gapAnalysis').innerHTML = html;
 
-  // === 五、全局汇总（变化过程） ===
-  html = '<tr><th colspan="8" style="background:#1a237e;color:#fff;font-size:14px;padding:10px">设备全景汇总：从「交叉共用」到「专机专用」</th></tr>';
-  html += '<tr><th>阶段</th><th>抖音</th><th>视频号</th><th>小红书</th><th>评论小号</th><th>电商测试</th><th>设备总数</th><th>备注</th></tr>';
+  // === 五、全局汇总 ===
+  html = '<tr><th colspan="8" style="background:#1a237e;color:#fff;font-size:14px;padding:10px">设备变化全过程（一目了然）</th></tr>';
+  html += '<tr><th>时间节点</th><th>抖音</th><th>视频号</th><th>小红书</th><th>评论小号</th><th>电商测试</th><th>手机总数</th><th>说明</th></tr>';
   const summary = [
-    ['调整前（交叉共用）','49台共用','35台共用','43台共用','—','—','53台','1台手机跑2-3个平台，效率低'],
+    ['调整前','49台共用','35台共用','43台共用','混用','无','53台','1台手机跑2-3个平台'],
     ['','','','','','','',''],
-    ['3月调整：拆分专用','30(安卓)','13(苹果)','0','10(安卓)','0','53台','53台全部重新分配到单一平台'],
-    ['+ 已购SE3(20台)','—','+17','+ 3(试用)','—','—','73台','视频号满编30台'],
-    ['+ 3月新购(20台)','—','—','+10','—','+10','93台','小红书+电商各10台'],
-    ['= 3月底合计','30','30','13','10','10','93台','确定数量，全部专机专用'],
+    ['第①步：53台重新分配','30(安卓)','13(苹果)','0','10(安卓)','0','53台','全部拆分，1机1平台'],
+    ['第②步：3/15新购SE3到位','—','+17→满编','+ 3(剩余)','—','—','73台','视频号补齐，小红书先到3台'],
+    ['第③步：3月底再购20台','—','—','+10→共13台','—','+10','93台','小红书+电商各加10台'],
+    ['= 3月底合计','30 ✅','30 ✅','13','10 ✅','10','93台','3个平台满编+小红书先上13台'],
     ['','','','','','','',''],
-    ['+ 4月待定(17台)','—','—','+17(待定)','—','—','110台','视小红书账号流量决定'],
-    ['= 最终目标','30','30','30','10','10','110台','全平台满编，1机1平台'],
+    ['第④步：4月待定+17台','—','—','+17(待评估)','—','—','110台','看小红书3月账号流量决定'],
+    ['= 全部满编','30 ✅','30 ✅','30 ✅','10 ✅','10 ✅','110台','5个方向全部到位'],
   ];
   summary.forEach((r,i) => {
     if (r[0] === '') { html += '<tr><td colspan="8" style="height:4px;background:#e0e0e0;padding:0"></td></tr>'; return; }
@@ -934,15 +932,15 @@ function renderDeviceStats() {
     const isPending = i===7;
     const isOld = i===0;
     const cls = isTotal ? 'total-row' : '';
-    const bg = isPending ? 'background:#fff3e0' : (isTotal && i===8 ? 'background:#e8f5e9' : (isOld ? 'background:#ffebee' : ''));
+    const bg = isPending ? 'background:#fff3e0' : (i===8 ? 'background:#e8f5e9' : (isOld ? 'background:#ffebee' : ''));
     html += `<tr class="${cls}" style="${bg}">`;
     html += `<td class="row-header" style="font-weight:600">${r[0]}</td>`;
     for (let j=1;j<=6;j++) html += `<td style="text-align:center;font-weight:${j===6||isTotal?'700':'500'}">${r[j]}</td>`;
     html += `<td style="font-size:12px">${r[7]}</td></tr>`;
   });
 
-  html += '<tr><td colspan="8" style="background:#e8f5e9;padding:10px;font-weight:600;color:#2e7d32">✅ 核心改进：从53台手机承载127个平台账号（人均2.4平台）→ 93-110台手机每台只跑1个平台，运营效率大幅提升</td></tr>';
-  html += '<tr><td colspan="8" style="background:#ffebee;padding:10px;font-weight:600;color:#c62828">📌 关键决策点：4月15日前根据小红书账号流量数据，决定是否追加采购17台（预算¥13,090）</td></tr>';
+  html += '<tr><td colspan="8" style="background:#e8f5e9;padding:10px;font-weight:600;color:#2e7d32">✅ 核心改进：53台手机跑127个账号（混乱） → 93~110台手机，每台只跑1个平台（高效）</td></tr>';
+  html += '<tr><td colspan="8" style="background:#ffebee;padding:10px;font-weight:600;color:#c62828">📌 3月底前需完成：采购小红书10台 + 电商测试10台 = 20台 | 4月决策：小红书是否追加17台</td></tr>';
   document.getElementById('deviceSummary').innerHTML = html;
 }
 
