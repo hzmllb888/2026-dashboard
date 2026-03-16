@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年流量部门 - 预算与项目推进看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#f0f2f5;color:#333;font-size:13px}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:22px;font-weight:600}
+.header .info{font-size:12px;opacity:0.85}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;padding:0 20px;position:sticky;top:0;z-index:100}
+.tab{padding:12px 24px;cursor:pointer;border-bottom:3px solid transparent;font-weight:500;transition:all .2s}
+.tab:hover{background:#f5f5f5}
+.tab.active{border-bottom-color:#1a237e;color:#1a237e;font-weight:600}
+.container{max-width:1600px;margin:0 auto;padding:15px}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:15px;overflow:hidden}
+.card-title{padding:12px 16px;font-size:15px;font-weight:600;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.card-title .badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:500}
+.badge-blue{background:#e3f2fd;color:#1565c0}
+.badge-green{background:#e8f5e9;color:#2e7d32}
+.badge-orange{background:#fff3e0;color:#e65100}
+.badge-red{background:#ffebee;color:#c62828}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 10px;text-align:center;border:1px solid #e8e8e8;white-space:nowrap}
+th{background:#f5f7fa;font-weight:600;font-size:12px}
+td{font-size:12px}
+.row-header{text-align:center;font-weight:500;background:#fafafa;min-width:140px}
+.editable{background:#fffde7;cursor:text;position:relative}
+.editable:hover{background:#fff9c4}
+.editable:focus{outline:2px solid #1a237e;background:#fff}
+.total-row{background:#e8eaf6;font-weight:600}
+.highlight{background:#e3f2fd}
+.kpi-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px}
+.kpi-card{background:linear-gradient(135deg,#fff,#f8f9fa);border:1px solid #e0e0e0;border-radius:8px;padding:16px;text-align:center}
+.kpi-card .label{font-size:11px;color:#666;margin-bottom:4px}
+.kpi-card .value{font-size:24px;font-weight:700;color:#1a237e}
+.kpi-card .sub{font-size:11px;color:#999;margin-top:4px}
+.progress-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s}
+.status-green{color:#2e7d32}
+.status-orange{color:#e65100}
+.status-red{color:#c62828}
+.cost-bar{display:flex;align-items:center;gap:10px;padding:4px 0}
+.cost-bar .bar{flex:1;height:24px;background:#e3f2fd;border-radius:4px;position:relative}
+.cost-bar .bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#1565c0,#42a5f5)}
+.cost-bar .bar-label{position:absolute;right:8px;top:3px;font-size:12px;color:#222;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}
+.legend{padding:8px 16px;font-size:11px;color:#666;border-top:1px solid #eee}
+.legend span{margin-right:16px}
+.sync-indicator{position:fixed;bottom:20px;right:20px;background:#2e7d32;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;opacity:0;transition:opacity .3s;z-index:1000}
+.sync-indicator.show{opacity:1}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:16px}
+@media(max-width:900px){.summary-grid{grid-template-columns:1fr}}
+.month-tag{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600}
+.m-spring{background:#ffecb3;color:#f57f17}
+.m-normal{background:#c8e6c9;color:#2e7d32}
+.m-holiday{background:#ffcdd2;color:#c62828}
+.perf-table td.neg{color:#c62828}
+.perf-table td.pos{color:#2e7d32}
+input.cell-input{width:60px;border:1px solid #bbb;border-radius:3px;padding:2px 4px;text-align:center;font-size:12px;background:#fffde7}
+input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>2026年流量部门 预算与项目推进看板</h1>
+    <div class="info">数据来源：预算工作计划v5 + PMP项目推进计划 | 最后更新：<span id="lastUpdate"></span></div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:20px;font-weight:700" id="todayDate"></div>
+    <div style="font-size:11px;opacity:0.7">数据自动联动 | 修改即时保存</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">总览仪表板</div>
+  <div class="tab" onclick="switchTab(1)">国内月度计划</div>
+  <div class="tab" onclick="switchTab(2)">国外TK计划</div>
+  <div class="tab" onclick="switchTab(3)">新项目追踪</div>
+  <div class="tab" onclick="switchTab(4)">预算成本</div>
+  <div class="tab" onclick="switchTab(5)">业绩测算</div>
+</div>
+
+<div class="container">
+
+<!-- Panel 0: Dashboard -->
+<div class="panel active" id="panel0">
+  <div class="kpi-cards" id="kpiCards"></div>
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-title">国内月度进度追踪 <span class="badge badge-blue">保底KPI 3,622条</span></div>
+      <div style="overflow-x:auto"><table id="dashDomestic"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">国外TK月度进度追踪 <span class="badge badge-green">独立核算</span></div>
+      <div style="overflow-x:auto"><table id="dashTK"></table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">全年成本结构一览 <span class="badge badge-orange">固定预算 ¥871,640</span></div>
+    <div style="padding:16px" id="costBars"></div>
+  </div>
+</div>
+
+<!-- Panel 1: Domestic Monthly -->
+<div class="panel" id="panel1">
+  <div class="card">
+    <div class="card-title">国内工厂流量项目月度线索计划 <span class="badge badge-blue">保底3,622 / 挑战4,165</span></div>
+    <div class="legend">
+      <span style="background:#fffde7;padding:2px 8px;border-radius:3px">黄色底 = 可编辑(实际数据)</span>
+      <span>数据修改后自动计算达成率、累计值，并同步到所有看板</span>
+    </div>
+    <div style="overflow-x:auto"><table id="domesticTable"></table></div>
+  </div>
+</div>
+
+<!-- Panel 2: TK -->
+<div class="panel" id="panel2">
+  <div class="card">
+    <div class="card-title">国外TK项目月度线索规划 <span class="badge badge-green">美区+泰区+英区</span></div>
+    <div class="legend"><span style="background:#fffde7;padding:2px 8px;border-radius:3px">黄色底 = 可编辑(实际数据)</span></div>
+    <div style="overflow-x:auto"><table id="tkTable"></table></div>
+  </div>
+</div>
+
+<!-- Panel 3: New Projects -->
+<div class="panel" id="panel3">
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-title">电商项目(AI系统软件) <span class="badge badge-orange">4月上线</span></div>
+      <div style="overflow-x:auto"><table id="ecomTable"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">海外TK工厂老板培训项目 <span class="badge badge-orange">5-6月上线</span></div>
+      <div style="overflow-x:auto"><table id="trainTable"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- Panel 4: Budget -->
+<div class="panel" id="panel4">
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-title">薪资人力预算 <span class="badge badge-blue">5人 ¥481,200/年（未调薪）</span></div>
+      <div style="overflow-x:auto"><table id="salaryTable"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">组长调薪模拟（6月起视业绩） <span class="badge badge-orange">影响下半年成本</span></div>
+      <div class="legend"><span>根据预算原则：6月起视业绩讨论调薪，以下模拟不同调薪幅度对全年成本的影响</span></div>
+      <div style="overflow-x:auto"><table id="raiseTable"></table></div>
+    </div>
+  </div>
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-title">设备成本预算 <span class="badge badge-blue">固定新购90台 ¥69,300</span></div>
+      <div style="overflow-x:auto"><table id="deviceTable"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">调薪后月度人力成本明细 <span class="badge badge-orange">1-5月不变 / 6月起调薪</span></div>
+      <div style="overflow-x:auto"><table id="monthlySalaryTable"></table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">综合预算汇总 <span class="badge badge-orange">固定 ¥871,640 + 浮动上限 ¥127,300</span></div>
+    <div style="overflow-x:auto"><table id="budgetSummaryTable"></table></div>
+  </div>
+</div>
+
+<!-- Panel 5: Performance -->
+<div class="panel" id="panel5">
+  <div class="card">
+    <div class="card-title">国内业绩测算（两情景对比） <span class="badge badge-green">实时联动</span></div>
+    <div class="legend"><span>基于实际填写数据自动推算业绩，公式与预算表联动</span></div>
+    <div style="overflow-x:auto"><table id="perfTable" class="perf-table"></table></div>
+  </div>
+</div>
+
+</div>
+
+<div class="sync-indicator" id="syncIndicator">数据已同步保存</div>
+
+<script>
+// ===== DATA =====
+const DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":60,"newPhones":7,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":80,"newPhones":12,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":93,"newPhones":13,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":7,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":10,"leads":20},{"month":"6月","phones":10,"leads":22},{"month":"7月","phones":10,"leads":25},{"month":"8月","phones":10,"leads":28},{"month":"9月","phones":10,"leads":28},{"month":"10月","phones":10,"leads":20},{"month":"11月","phones":10,"leads":28},{"month":"12月","phones":10,"leads":30}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":10,"leads":15},{"month":"7月","phones":10,"leads":20},{"month":"8月","phones":10,"leads":22},{"month":"9月","phones":10,"leads":22},{"month":"10月","phones":10,"leads":15},{"month":"11月","phones":10,"leads":22},{"month":"12月","phones":10,"leads":25}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本","amt":69300},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
+
+// Actual data storage (persisted to localStorage)
+let actualData = JSON.parse(localStorage.getItem('budget2026_actual') || 'null') || {
+  domestic: Array(12).fill(null).map(() => ({dy:0,xhs:0,sph:0})),
+  tk: Array(12).fill(0),
+  ecom: Array(12).fill(0),
+  train: Array(12).fill(0),
+};
+
+function save() {
+  localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
+  const ind = document.getElementById('syncIndicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 1500);
+}
+
+function fmt(n) { return typeof n === 'number' ? n.toLocaleString() : n; }
+function fmtY(n) { return '¥' + n.toLocaleString(); }
+function pct(a, b) { return b ? (a/b*100).toFixed(1)+'%' : '—'; }
+
+function statusClass(rate) {
+  if (rate >= 100) return 'status-green';
+  if (rate >= 80) return 'status-orange';
+  return 'status-red';
+}
+
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+function getActualDomestic(mi) {
+  const a = actualData.domestic[mi];
+  return (a.dy||0) + (a.xhs||0) + (a.sph||0);
+}
+function getCumulActual(mi) {
+  let sum = 0;
+  for (let i = 0; i <= mi; i++) sum += getActualDomestic(i);
+  return sum;
+}
+function getCumulTarget(mi) {
+  let sum = 0;
+  for (let i = 0; i <= mi; i++) sum += DATA.domestic[i].baodi;
+  return sum;
+}
+function getTotalActualDomestic() {
+  let s=0; for(let i=0;i<12;i++) s+=getActualDomestic(i); return s;
+}
+function getTotalActualTK() {
+  let s=0; for(let i=0;i<12;i++) s+=(actualData.tk[i]||0); return s;
+}
+
+// ===== RENDER FUNCTIONS =====
+
+function renderKPI() {
+  const totalActDom = getTotalActualDomestic();
+  const totalActTK = getTotalActualTK();
+  const totalBaodi = 3622;
+  const totalChallenge = 4165;
+  const totalCost = 871640;
+  const domRate = totalBaodi > 0 ? (totalActDom/totalBaodi*100) : 0;
+
+  const cards = [
+    {label:'国内线索(保底)', value: fmt(totalBaodi)+'条', sub:'实际: '+fmt(totalActDom)+' | 达成: '+domRate.toFixed(1)+'%', color:'#1565c0'},
+    {label:'国内线索(挑战)', value: fmt(totalChallenge)+'条', sub:'挑战目标 +15%', color:'#6a1b9a'},
+    {label:'国外TK(估算)', value:'3,277~3,727条', sub:'实际: '+fmt(totalActTK)+'条', color:'#2e7d32'},
+    {label:'固定年度预算', value: fmtY(totalCost), sub:'月均: '+fmtY(Math.round(totalCost/12)), color:'#e65100'},
+    {label:'团队规模', value:'5人', sub:'月人力成本: '+fmtY(40100), color:'#00695c'},
+    {label:'设备总数', value:'135台', sub:'国内100+国外15+电商10(3月)+培训10', color:'#4527a0'},
+  ];
+
+  let html = '';
+  cards.forEach(c => {
+    html += `<div class="kpi-card"><div class="label">${c.label}</div><div class="value" style="color:${c.color}">${c.value}</div><div class="sub">${c.sub}</div></div>`;
+  });
+  document.getElementById('kpiCards').innerHTML = html;
+}
+
+function hasActualDomestic(mi) {
+  const a = actualData.domestic[mi];
+  return (a.dy||0) > 0 || (a.xhs||0) > 0 || (a.sph||0) > 0;
+}
+function getLastFilledMonth() {
+  for (let i = 11; i >= 0; i--) { if (hasActualDomestic(i)) return i; }
+  return -1;
+}
+function renderDashDomestic() {
+  const lastFilled = getLastFilledMonth();
+  let html = '<tr><th>月份</th><th>目标(保底)</th><th>本月实际</th><th>达成率</th><th>累计目标</th><th>累计实际</th><th>年度进度</th></tr>';
+  for (let i = 0; i < 12; i++) {
+    const d = DATA.domestic[i];
+    const act = getActualDomestic(i);
+    const filled = hasActualDomestic(i);
+    const cumT = getCumulTarget(i);
+    const cumA = getCumulActual(i);
+    const showCumA = i <= lastFilled && lastFilled >= 0;
+    const yearlyTarget = 3622;
+    const yearProgress = (showCumA && yearlyTarget > 0) ? (cumA/yearlyTarget*100) : 0;
+    const rate = (d.baodi > 0 && filled) ? (act/d.baodi*100) : 0;
+    const sc = filled ? statusClass(rate) : '';
+    html += `<tr><td><b>${d.month}</b></td><td>${fmt(d.baodi)}</td><td style="font-weight:600">${filled?fmt(act):'—'}</td><td class="${sc}">${filled?rate.toFixed(1)+'%':'—'}</td><td>${fmt(cumT)}</td><td>${showCumA?fmt(cumA):'—'}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(yearProgress,100)}%;background:${yearProgress>=80?'#2e7d32':yearProgress>=50?'#f57f17':'#1565c0'}"></div></div><span style="font-size:10px;color:#666">${showCumA?yearProgress.toFixed(1)+'%':'—'}</span></td></tr>`;
+  }
+  const totalAct = getTotalActualDomestic();
+  const anyFilled = lastFilled >= 0;
+  html += `<tr class="total-row"><td>全年</td><td>3,622</td><td>${anyFilled?fmt(totalAct):'—'}</td><td>${anyFilled?pct(totalAct,3622):'—'}</td><td>3,622</td><td>${anyFilled?fmt(totalAct):'—'}</td><td></td></tr>`;
+  document.getElementById('dashDomestic').innerHTML = html;
+}
+
+function renderDashTK() {
+  let html = '<tr><th>月份</th><th>目标(低)</th><th>目标(高)</th><th>实际</th><th>达成率</th></tr>';
+  for (let i = 0; i < 12; i++) {
+    const t = DATA.tk[i];
+    const act = actualData.tk[i] || 0;
+    const rate = t.low > 0 ? (act/t.low*100) : 0;
+    const sc = act ? statusClass(rate) : '';
+    html += `<tr><td><b>${t.month}</b></td><td>${fmt(t.low)}</td><td>${fmt(t.high)}</td><td style="font-weight:600">${act||'—'}</td><td class="${sc}">${act?pct(act,t.low):'—'}</td></tr>`;
+  }
+  const totalAct = getTotalActualTK();
+  html += `<tr class="total-row"><td>全年</td><td>3,277</td><td>3,727</td><td>${totalAct||'—'}</td><td>${totalAct?pct(totalAct,3277):'—'}</td></tr>`;
+  document.getElementById('dashTK').innerHTML = html;
+}
+
+function renderCostBars() {
+  const total = 871640;
+  const colors = ['#1565c0','#2e7d32','#e65100','#6a1b9a','#00695c','#c62828'];
+  let html = '';
+  DATA.costs.forEach((c,i) => {
+    const w = (c.amt/total*100).toFixed(1);
+    html += `<div class="cost-bar"><div style="width:120px;text-align:right;font-weight:500">${c.name}</div><div class="bar"><div class="bar-fill" style="width:${w}%;background:${colors[i]}"><span class="bar-label">${fmtY(c.amt)} (${w}%)</span></div></div></div>`;
+  });
+  document.getElementById('costBars').innerHTML = html;
+}
+
+function renderDomesticTable() {
+  const months = DATA.months;
+  let html = '<tr><th rowspan="2">指标</th>';
+  months.forEach(m => html += `<th>${m}</th>`);
+  html += '<th>全年</th></tr>';
+
+  const rows = [
+    {label:'手机总台数', key:'phones', sum:false},
+    {label:'本月新增手机', key:'newPhones', sum:true},
+    {label:'抖音运营账号', key:'dy_acc', sum:false},
+    {label:'小红书运营账号', key:'xhs_acc', sum:false},
+    {label:'视频号运营账号', key:'sph_acc', sum:false},
+    {label:'抖音目标', key:'dy_target', sum:true},
+    {label:'小红书目标', key:'xhs_target', sum:true},
+    {label:'视频号目标', key:'sph_target', sum:true},
+    {label:'保底合计', key:'baodi', sum:true, cls:'highlight'},
+    {label:'挑战合计', key:'challenge', sum:true, cls:'highlight'},
+  ];
+
+  rows.forEach(r => {
+    let total = 0;
+    html += `<tr${r.cls?' class="'+r.cls+'"':''}><td class="row-header">${r.label}</td>`;
+    months.forEach((m,i) => {
+      const v = DATA.domestic[i][r.key];
+      if (r.sum && typeof v === 'number') total += v;
+      html += `<td>${fmt(v)}</td>`;
+    });
+    html += `<td class="total-row">${r.sum ? fmt(total) : '—'}</td></tr>`;
+  });
+
+  // Actual input rows
+  ['抖音实际','小红书实际','视频号实际'].forEach((label, pi) => {
+    const keys = ['dy','xhs','sph'];
+    let total = 0;
+    html += `<tr style="background:#fffde7"><td class="row-header">${label}</td>`;
+    months.forEach((m,i) => {
+      const v = actualData.domestic[i][keys[pi]] || '';
+      if (v) total += v;
+      html += `<td><input class="cell-input" type="number" value="${v}" data-type="domestic" data-month="${i}" data-key="${keys[pi]}" onchange="updateActual(this)"></td>`;
+    });
+    html += `<td class="total-row">${total||'—'}</td></tr>`;
+  });
+
+  // Computed actual total
+  html += '<tr class="total-row" style="background:#c8e6c9"><td class="row-header">实际合计</td>';
+  let grandTotal = 0;
+  months.forEach((m,i) => {
+    const v = getActualDomestic(i);
+    grandTotal += v;
+    html += `<td>${v||'—'}</td>`;
+  });
+  html += `<td>${grandTotal||'—'}</td></tr>`;
+
+  // 达成率
+  html += '<tr><td class="row-header">达成率(实/保底)</td>';
+  months.forEach((m,i) => {
+    const act = getActualDomestic(i);
+    const target = DATA.domestic[i].baodi;
+    const rate = target > 0 && act > 0 ? (act/target*100) : 0;
+    const sc = act ? statusClass(rate) : '';
+    html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
+  });
+  html += `<td class="${grandTotal?statusClass(grandTotal/3622*100):''}">${grandTotal?pct(grandTotal,3622):'—'}</td></tr>`;
+
+  // Cumulative
+  html += '<tr class="highlight"><td class="row-header">累计目标(保底)</td>';
+  months.forEach((m,i) => html += `<td>${fmt(getCumulTarget(i))}</td>`);
+  html += '<td>3,622</td></tr>';
+
+  const lastFilledDom = getLastFilledMonth();
+  html += '<tr class="highlight"><td class="row-header">累计实际</td>';
+  months.forEach((m,i) => {
+    const v = getCumulActual(i);
+    const show = i <= lastFilledDom && lastFilledDom >= 0;
+    html += `<td>${show?fmt(v):'—'}</td>`;
+  });
+  html += `<td>${lastFilledDom>=0?fmt(grandTotal):'—'}</td></tr>`;
+
+  document.getElementById('domesticTable').innerHTML = html;
+}
+
+function renderTKTable() {
+  let html = '<tr><th>指标</th>';
+  DATA.months.forEach(m => html += `<th>${m}</th>`);
+  html += '<th>全年</th></tr>';
+
+  const tkRows = [
+    {label:'手机台数', get: t=>t.phones},
+    {label:'美区+泰区(低)', get: t=>t.us_low, sum:true},
+    {label:'美区+泰区(高)', get: t=>t.us_high, sum:true},
+    {label:'英区新增', get: t=>t.uk, sum:true},
+    {label:'月合计(低/保守)', get: t=>t.low, sum:true, cls:'highlight'},
+    {label:'月合计(高/乐观)', get: t=>t.high, sum:true, cls:'highlight'},
+  ];
+  tkRows.forEach(r => {
+    let total = 0;
+    html += `<tr${r.cls?' class="'+r.cls+'"':''}><td class="row-header">${r.label}</td>`;
+    DATA.tk.forEach((t,i) => {
+      const v = r.get(t);
+      if (r.sum && typeof v === 'number') total += v;
+      html += `<td>${fmt(v)}</td>`;
+    });
+    html += `<td class="total-row">${r.sum?fmt(total):'—'}</td></tr>`;
+  });
+
+  // Actual
+  html += '<tr style="background:#fffde7"><td class="row-header">实际填写</td>';
+  let tkTotal = 0;
+  DATA.months.forEach((m,i) => {
+    const v = actualData.tk[i] || '';
+    if (v) tkTotal += v;
+    html += `<td><input class="cell-input" type="number" value="${v}" data-type="tk" data-month="${i}" onchange="updateActual(this)"></td>`;
+  });
+  html += `<td class="total-row">${tkTotal||'—'}</td></tr>`;
+
+  // 达成率
+  html += '<tr><td class="row-header">达成率(实/低目标)</td>';
+  DATA.months.forEach((m,i) => {
+    const act = actualData.tk[i] || 0;
+    const target = DATA.tk[i].low;
+    const rate = target > 0 && act > 0 ? (act/target*100) : 0;
+    const sc = act ? statusClass(rate) : '';
+    html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
+  });
+  html += `<td>${tkTotal?pct(tkTotal,3277):'—'}</td></tr>`;
+
+  document.getElementById('tkTable').innerHTML = html;
+}
+
+function renderNewProjects() {
+  // E-commerce
+  let html = '<tr><th>指标</th>';
+  DATA.months.forEach(m => html += `<th>${m}</th>`);
+  html += '<th>合计</th></tr>';
+
+  html += '<tr><td class="row-header">手机台数</td>';
+  DATA.ecom.forEach(e => html += `<td>${e.phones||'—'}</td>`);
+  html += '<td>10</td></tr>';
+
+  html += '<tr><td class="row-header">预计进线</td>';
+  let ecomSum = 0;
+  DATA.ecom.forEach(e => { ecomSum += e.leads; html += `<td>${e.leads||'—'}</td>`; });
+  html += `<td class="total-row">${ecomSum}</td></tr>`;
+
+  html += '<tr style="background:#fffde7"><td class="row-header">实际进线</td>';
+  let ecomActTotal = 0;
+  DATA.months.forEach((m,i) => {
+    const v = actualData.ecom[i] || '';
+    if (v) ecomActTotal += v;
+    html += `<td>${DATA.ecom[i].phones?'<input class="cell-input" type="number" value="'+v+'" data-type="ecom" data-month="'+i+'" onchange="updateActual(this)">':'—'}</td>`;
+  });
+  html += `<td class="total-row">${ecomActTotal||'—'}</td></tr>`;
+  document.getElementById('ecomTable').innerHTML = html;
+
+  // Training
+  html = '<tr><th>指标</th>';
+  DATA.months.forEach(m => html += `<th>${m}</th>`);
+  html += '<th>合计</th></tr>';
+
+  html += '<tr><td class="row-header">手机台数</td>';
+  DATA.train.forEach(t => html += `<td>${t.phones||'—'}</td>`);
+  html += '<td>10</td></tr>';
+
+  html += '<tr><td class="row-header">预计招生/线索</td>';
+  let trainSum = 0;
+  DATA.train.forEach(t => { trainSum += t.leads; html += `<td>${t.leads||'—'}</td>`; });
+  html += `<td class="total-row">${trainSum}</td></tr>`;
+
+  html += '<tr style="background:#fffde7"><td class="row-header">实际招生</td>';
+  let trainActTotal = 0;
+  DATA.months.forEach((m,i) => {
+    const v = actualData.train[i] || '';
+    if (v) trainActTotal += v;
+    html += `<td>${DATA.train[i].phones?'<input class="cell-input" type="number" value="'+v+'" data-type="train" data-month="'+i+'" onchange="updateActual(this)">':'—'}</td>`;
+  });
+  html += `<td class="total-row">${trainActTotal||'—'}</td></tr>`;
+  document.getElementById('trainTable').innerHTML = html;
+}
+
+function renderBudget() {
+  // Salary table (current, no raise)
+  let html = '<tr><th>人员</th><th>人数</th><th>底薪</th><th>提成</th><th>社保</th><th>月成本</th><th>年成本</th></tr>';
+  let totalM = 0, totalY = 0;
+  DATA.salary.forEach(s => {
+    totalM += s.m; totalY += s.y;
+    html += `<tr><td class="row-header">${s.r}</td><td>${s.n}</td><td>${fmtY(s.b)}</td><td>${fmtY(s.c)}</td><td>${fmtY(s.s)}</td><td>${fmtY(s.m)}</td><td>${fmtY(s.y)}</td></tr>`;
+  });
+  html += `<tr class="total-row"><td>合计(5人)</td><td>5</td><td>—</td><td>—</td><td>—</td><td>${fmtY(totalM)}</td><td>${fmtY(totalY)}</td></tr>`;
+  document.getElementById('salaryTable').innerHTML = html;
+
+  // Raise simulation table
+  const raiseScenarios = [
+    {label:'不调薪（基准）', domestic:0, foreign:0},
+    {label:'方案一：各+500', domestic:500, foreign:500},
+    {label:'方案二：各+1000', domestic:1000, foreign:1000},
+    {label:'方案三：国内+1000/国外+500', domestic:1000, foreign:500},
+    {label:'方案四：各+1500', domestic:1500, foreign:1500},
+  ];
+  // Base: domestic leader 5500+2000+1700=9200, foreign leader 5000+2000+1700=8700
+  // 3 staff: 4500+1200+1700=7400 each, total staff=22200
+  // Monthly base = 9200+8700+22200 = 40100
+  // Raise applies to leaders only, from month 6-12 (7 months)
+  html = '<tr><th>调薪方案</th><th>国内组长调薪</th><th>国外组长调薪</th><th>月增加成本</th><th>下半年增加<br>(6-12月, 7个月)</th><th>调薪后全年<br>人力总成本</th><th>较基准增加</th></tr>';
+  raiseScenarios.forEach((sc, idx) => {
+    const monthlyIncrease = sc.domestic + sc.foreign;
+    const halfYearIncrease = monthlyIncrease * 7;
+    const newYearlyTotal = 481200 + halfYearIncrease;
+    const cls = idx === 0 ? 'total-row' : '';
+    html += `<tr class="${cls}"><td class="row-header">${sc.label}</td>`;
+    html += `<td>${sc.domestic ? '+'+fmtY(sc.domestic)+'/月' : '—'}</td>`;
+    html += `<td>${sc.foreign ? '+'+fmtY(sc.foreign)+'/月' : '—'}</td>`;
+    html += `<td>${monthlyIncrease ? '+'+fmtY(monthlyIncrease) : '—'}</td>`;
+    html += `<td>${halfYearIncrease ? '+'+fmtY(halfYearIncrease) : '—'}</td>`;
+    html += `<td style="font-weight:600">${fmtY(newYearlyTotal)}</td>`;
+    html += `<td>${halfYearIncrease ? '+'+fmtY(halfYearIncrease)+' (+' + (halfYearIncrease/481200*100).toFixed(1) + '%)' : '—'}</td>`;
+    html += '</tr>';
+  });
+  document.getElementById('raiseTable').innerHTML = html;
+
+  // Monthly salary detail table (with raise from June)
+  html = '<tr><th>月份</th><th>国内组长</th><th>国外组长</th><th>组员x3</th><th>提成合计</th><th>社保合计</th><th>月度合计</th><th>备注</th></tr>';
+  // Default: show scenario 2 (各+1000) as reference, highlight June change
+  let yearlySum = 0;
+  for (let i = 0; i < 12; i++) {
+    const m = DATA.months[i];
+    const isRaised = i >= 5; // June onwards (index 5)
+    const domLeader = 5500 + (isRaised ? 1000 : 0);
+    const forLeader = 5000 + (isRaised ? 1000 : 0);
+    const staffTotal = 4500 * 3;
+    const commission = 7600; // 2000+2000+1200*3
+    const social = 8500; // 1700*5
+    const monthly = domLeader + forLeader + staffTotal + commission + social;
+    yearlySum += monthly;
+    const bg = isRaised ? 'background:#fff3e0' : '';
+    const note = i === 5 ? '6月起调薪(示例：各+1000)' : (i === 0 ? '1-5月维持原薪资' : '');
+    html += `<tr style="${bg}"><td>${m}</td><td>${fmtY(domLeader)}</td><td>${fmtY(forLeader)}</td><td>${fmtY(staffTotal)}</td><td>${fmtY(commission)}</td><td>${fmtY(social)}</td><td style="font-weight:600">${fmtY(monthly)}</td><td>${note}</td></tr>`;
+  }
+  html += `<tr class="total-row"><td>全年合计</td><td colspan="5"></td><td style="font-weight:700">${fmtY(yearlySum)}</td><td>较基准+${fmtY(yearlySum-481200)}</td></tr>`;
+  document.getElementById('monthlySalaryTable').innerHTML = html;
+
+  // Device table
+  html = '<tr><th>项目</th><th>新购台数</th><th>单价</th><th>成本</th><th>说明</th></tr>';
+  const devices = [
+    {name:'国内三平台净增',n:37,p:770,desc:'53台→90台(含3月+7台新开账号)'},
+    {name:'替换旧安卓',n:23,p:770,desc:'含3月替换3台老旧手机'},
+    {name:'评论辅助小号',n:10,p:770,desc:'互动评论'},
+    {name:'电商项目(固定)',n:10,p:770,desc:'3月到位10台，用于电商测试'},
+    {name:'海外培训(固定)',n:10,p:770,desc:'测试期'},
+  ];
+  let devTotal = 0;
+  devices.forEach(d => {
+    const cost = d.n * d.p;
+    devTotal += cost;
+    html += `<tr><td class="row-header">${d.name}</td><td>${d.n}</td><td>${fmtY(d.p)}</td><td>${fmtY(cost)}</td><td>${d.desc}</td></tr>`;
+  });
+  html += `<tr class="total-row"><td>固定新购合计</td><td>90</td><td>¥770</td><td>${fmtY(devTotal)}</td><td>进年度预算</td></tr>`;
+  document.getElementById('deviceTable').innerHTML = html;
+
+  // Budget summary
+  html = '<tr><th>费用类别</th><th>年度金额</th><th>占比</th><th>说明</th></tr>';
+  const total = 871640;
+  const budgetItems = [
+    {name:'人力成本(5人)',amt:481200,desc:'含提成+社保，暂不预设调薪'},
+    {name:'设备成本(固定90台)',amt:69300,desc:'国内70+电商10+培训10'},
+    {name:'账号基建',amt:138840,desc:'厅卡+实名+认证+测试+线路'},
+    {name:'投放成本',amt:109600,desc:'小红书+抖音+TikTok+独立站'},
+    {name:'新项目运营',amt:38500,desc:'电商22500+培训16000'},
+    {name:'学习差旅',amt:34200,desc:'进修25000+差旅8000+团建1200'},
+  ];
+  budgetItems.forEach(b => {
+    html += `<tr><td class="row-header">${b.name}</td><td style="font-weight:600">${fmtY(b.amt)}</td><td>${(b.amt/total*100).toFixed(1)}%</td><td>${b.desc}</td></tr>`;
+  });
+  html += `<tr class="total-row"><td>固定预算总计</td><td>${fmtY(total)}</td><td>100%</td><td></td></tr>`;
+  html += '<tr style="background:#fff3e0"><td colspan="4" style="text-align:left;font-weight:600">浮动预算（条件触发）</td></tr>';
+  const floats = [
+    {name:'电商项目扩张(+20台)',amt:15400,desc:'效果达标后'},
+    {name:'海外培训扩张(+20台)',amt:15400,desc:'学员招收后'},
+    {name:'TK英区扩设备',amt:7700,desc:'英区月产<15条'},
+    {name:'组员增员',amt:88800,desc:'新项目稳定后'},
+  ];
+  let floatTotal = 0;
+  floats.forEach(f => {
+    floatTotal += f.amt;
+    html += `<tr><td class="row-header">${f.name}</td><td>${fmtY(f.amt)}</td><td>—</td><td>${f.desc}</td></tr>`;
+  });
+  html += `<tr class="total-row" style="background:#ffe0b2"><td>浮动合计(上限)</td><td>${fmtY(floatTotal)}</td><td>—</td><td></td></tr>`;
+  document.getElementById('budgetSummaryTable').innerHTML = html;
+}
+
+function renderPerformance() {
+  const p = DATA.perf;
+  const totalAct = getTotalActualDomestic();
+
+  // Use actual if available, otherwise use targets
+  const scenA_leads = totalAct || p.baodi;
+  const scenB_leads = totalAct || p.challenge;
+  const useActual = totalAct > 0;
+
+  const baseCost = 871640;
+  // Raise cost scenarios: each +500, +1000, +1500 for 7 months (June-Dec)
+  const raiseCosts = [0, 7000, 14000, 21000]; // 0, 500*2*7, 1000*2*7, 1500*2*7
+  const raiseLabels = ['不调薪', '各+500', '各+1000', '各+1500'];
+
+  const calc = (leads, extraCost) => {
+    const precise = Math.round(leads * p.conv);
+    const orders = Math.round(precise * p.order);
+    const revenue = orders * p.aov;
+    const newProfit = Math.round(revenue * p.margin);
+    const totalProfit = newProfit + p.repeat;
+    const totalCost = baseCost + extraCost;
+    const netProfit = totalProfit - totalCost;
+    return {leads, precise, orders, revenue, newProfit, totalProfit, totalCost, netProfit};
+  };
+
+  const a = calc(p.baodi, 0);
+  const b = calc(p.challenge, 0);
+  const act = useActual ? calc(totalAct, 0) : null;
+
+  let html = '<tr><th>推导步骤</th><th>情景A：保底 3,622条</th><th>情景B：挑战 4,165条</th>';
+  if (act) html += '<th style="background:#e8f5e9">实际推算</th>';
+  html += '</tr>';
+
+  const steps = [
+    {label:'全年线索(条)', ka:'leads', kb:'leads'},
+    {label:'精准线索(x11%)', ka:'precise', kb:'precise'},
+    {label:'下单客户(x17%)', ka:'orders', kb:'orders'},
+    {label:'新客营业额(元)', ka:'revenue', kb:'revenue', isMoney:true},
+    {label:'新客毛利(x30%)', ka:'newProfit', kb:'newProfit', isMoney:true},
+    {label:'老客复购利润(元)', ka:'', kb:'', fixed: p.repeat, isMoney:true},
+    {label:'国内利润合计(元)', ka:'totalProfit', kb:'totalProfit', isMoney:true, bold:true},
+    {label:'总运营成本(元)', ka:'totalCost', kb:'totalCost', isMoney:true},
+    {label:'净利润(元)', ka:'netProfit', kb:'netProfit', isMoney:true, bold:true, highlight:true},
+  ];
+
+  steps.forEach(s => {
+    const va = s.fixed !== undefined ? s.fixed : a[s.ka];
+    const vb = s.fixed !== undefined ? s.fixed : b[s.kb];
+    const fmtFn = s.isMoney ? fmtY : fmt;
+    const style = s.bold ? 'font-weight:700' : '';
+    const cls = s.highlight ? (va >= 0 ? 'pos' : 'neg') : '';
+    const clsB = s.highlight ? (vb >= 0 ? 'pos' : 'neg') : '';
+
+    html += `<tr><td class="row-header">${s.label}</td><td style="${style}" class="${cls}">${fmtFn(va)}</td><td style="${style}" class="${clsB}">${fmtFn(vb)}</td>`;
+    if (act) {
+      const vact = s.fixed !== undefined ? s.fixed : act[s.ka];
+      const clsAct = s.highlight ? (vact >= 0 ? 'pos' : 'neg') : '';
+      html += `<td style="${style};background:#e8f5e9" class="${clsAct}">${fmtFn(vact)}</td>`;
+    }
+    html += '</tr>';
+  });
+
+  // Add raise impact section
+  html += '<tr style="background:#fff3e0"><td colspan="' + (act ? 4 : 3) + '" style="font-weight:600;padding:10px">组长调薪对净利润的影响（6月起生效，影响7个月）</td></tr>';
+  html += '<tr><th>调薪方案</th><th>情景A净利润</th><th>情景B净利润</th>';
+  if (act) html += '<th style="background:#e8f5e9">实际推算净利润</th>';
+  html += '</tr>';
+
+  raiseCosts.forEach((rc, idx) => {
+    const ra = calc(p.baodi, rc);
+    const rb = calc(p.challenge, rc);
+    const ract = useActual ? calc(totalAct, rc) : null;
+    const cls = idx === 0 ? 'total-row' : '';
+    html += `<tr class="${cls}"><td class="row-header">${raiseLabels[idx]}${rc ? ' (成本+'+fmtY(rc)+')' : ''}</td>`;
+    html += `<td style="font-weight:600" class="${ra.netProfit>=0?'pos':'neg'}">${fmtY(ra.netProfit)}</td>`;
+    html += `<td style="font-weight:600" class="${rb.netProfit>=0?'pos':'neg'}">${fmtY(rb.netProfit)}</td>`;
+    if (ract) html += `<td style="font-weight:600;background:#e8f5e9" class="${ract.netProfit>=0?'pos':'neg'}">${fmtY(ract.netProfit)}</td>`;
+    html += '</tr>';
+  });
+
+  document.getElementById('perfTable').innerHTML = html;
+}
+
+function updateActual(el) {
+  const type = el.dataset.type;
+  const mi = parseInt(el.dataset.month);
+  const val = parseFloat(el.value) || 0;
+
+  if (type === 'domestic') {
+    const key = el.dataset.key;
+    actualData.domestic[mi][key] = val;
+  } else if (type === 'tk') {
+    actualData.tk[mi] = val;
+  } else if (type === 'ecom') {
+    actualData.ecom[mi] = val;
+  } else if (type === 'train') {
+    actualData.train[mi] = val;
+  }
+
+  save();
+  renderAll();
+}
+
+function renderAll() {
+  renderKPI();
+  renderDashDomestic();
+  renderDashTK();
+  renderCostBars();
+  renderDomesticTable();
+  renderTKTable();
+  renderNewProjects();
+  renderBudget();
+  renderPerformance();
+}
+
+// Init
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN');
+document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+renderAll();
+</script>
+</body>
+</html>
