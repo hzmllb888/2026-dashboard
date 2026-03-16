@@ -409,11 +409,15 @@ function save() {
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
   localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
   // 2. 云端同步（异步）
-  skipNextFirebaseRender = true; // 防止自己的写入触发重复渲染
-  planRef.set(JSON.parse(JSON.stringify(DATA))).catch(err => {
-    console.error('Firebase plan save failed:', err);
-    showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
-  });
+  skipNextFirebaseRender = true;
+  // 计划数据只有管理员能写入云端
+  if (userRole === 'admin') {
+    planRef.set(JSON.parse(JSON.stringify(DATA))).catch(err => {
+      console.error('Firebase plan save failed:', err);
+      showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
+    });
+  }
+  // 实际数据所有人都能写入
   actualRef.set(JSON.parse(JSON.stringify(actualData))).catch(err => {
     console.error('Firebase actual save failed:', err);
     showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
@@ -531,6 +535,10 @@ function adjInput(attrs, val) {
     '</div>';
 }
 function planInp(section, mi, key, val) {
+  // 员工只能看，不能改计划数据
+  if (userRole === 'staff') {
+    return '<span style="font-weight:600">' + (val||0) + '</span>';
+  }
   const id = 'plan_' + section + '_' + mi + '_' + key;
   return '<div class="adj-wrap">' +
     '<button class="adj-btn" onclick="adjVal(\'' + id + '\',-1,true)">−</button>' +
