@@ -662,26 +662,6 @@ function renderTKTable() {
     html += `<td class="total-row">${r.sum?fmt(total):'—'}</td></tr>`;
   });
 
-  // Computed low total (us_low + uk, read-only)
-  let totalLow = 0;
-  html += '<tr class="highlight"><td class="row-header">月合计(低)</td>';
-  DATA.months.forEach((m,i) => {
-    const v = getComputedTKLow(i);
-    totalLow += v;
-    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
-  });
-  html += `<td class="total-row" style="font-weight:700">${fmt(totalLow)}</td></tr>`;
-
-  // Computed high total (us_high + uk, read-only)
-  let totalHigh = 0;
-  html += '<tr class="highlight"><td class="row-header">月合计(高)</td>';
-  DATA.months.forEach((m,i) => {
-    const v = getComputedTKHigh(i);
-    totalHigh += v;
-    html += `<td style="font-weight:600;background:#e3f2fd">${fmt(v)}</td>`;
-  });
-  html += `<td class="total-row" style="font-weight:700">${fmt(totalHigh)}</td></tr>`;
-
   // Actual
   html += '<tr style="background:#fffde7"><td class="row-header">实际填写</td>';
   let tkTotal = 0;
@@ -702,7 +682,7 @@ function renderTKTable() {
     const sc = act ? statusClass(rate) : '';
     html += `<td class="${sc}">${act?rate.toFixed(1)+'%':'—'}</td>`;
   });
-  html += `<td>${tkTotal?pct(tkTotal,totalLow):'—'}</td></tr>`;
+  html += `<td>${tkTotal?pct(tkTotal,getTotalTKLow()):'—'}</td></tr>`;
 
   document.getElementById('tkTable').innerHTML = html;
 }
