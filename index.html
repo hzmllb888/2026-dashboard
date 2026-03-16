@@ -129,7 +129,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
     </div>
   </div>
   <div class="card" id="costSection">
-    <div class="card-title">全年成本结构一览 <span class="badge badge-orange">固定预算 ¥871,640</span></div>
+    <div class="card-title">全年成本结构一览 <span class="badge badge-orange">固定预算 ¥833,140</span></div>
     <div style="padding:16px" id="costBars"></div>
   </div>
 </div>
@@ -159,11 +159,11 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
 <div class="panel" id="panel3">
   <div class="summary-grid">
     <div class="card">
-      <div class="card-title">电商项目(AI系统软件) <span class="badge badge-orange">4月上线</span></div>
+      <div class="card-title">电商项目(AI系统软件) <span class="badge badge-orange">3月10台启动 | 目标30台</span></div>
       <div style="overflow-x:auto"><table id="ecomTable"></table></div>
     </div>
     <div class="card">
-      <div class="card-title">海外TK工厂老板培训项目 <span class="badge badge-orange">5-6月上线</span></div>
+      <div class="card-title">海外工厂项目 <span class="badge badge-orange">5月10台启动 | 目标30台</span></div>
       <div style="overflow-x:auto"><table id="trainTable"></table></div>
     </div>
   </div>
@@ -184,7 +184,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
   </div>
   <div class="summary-grid">
     <div class="card">
-      <div class="card-title">设备成本预算 <span class="badge badge-blue">固定新购90台 ¥69,300</span></div>
+      <div class="card-title">设备成本预算 <span class="badge badge-blue">已确定40台 ¥30,800 | 待评估67台 ¥51,590</span></div>
       <div style="overflow-x:auto"><table id="deviceTable"></table></div>
     </div>
     <div class="card">
@@ -193,7 +193,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
     </div>
   </div>
   <div class="card">
-    <div class="card-title">综合预算汇总 <span class="badge badge-orange">固定 ¥871,640 + 浮动上限 ¥127,300</span></div>
+    <div class="card-title">综合预算汇总 <span class="badge badge-orange">固定 ¥833,140 + 浮动上限 ¥148,090</span></div>
     <div style="overflow-x:auto"><table id="budgetSummaryTable"></table></div>
   </div>
 </div>
@@ -221,7 +221,7 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
       <div style="overflow-x:auto"><table id="deviceOverview"></table></div>
     </div>
     <div class="card">
-      <div class="card-title">二、3月调整规划：1机1平台 <span class="badge badge-green">目标30台/平台</span></div>
+      <div class="card-title">二、6大方向设备规划 <span class="badge badge-green">全年满编160台</span></div>
       <div style="overflow-x:auto"><table id="platformAlloc"></table></div>
     </div>
   </div>
@@ -278,7 +278,7 @@ function applyPermissions() {
 
 <script>
 // ===== DATA =====
-const DEFAULT_DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":63,"newPhones":10,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":80,"newPhones":12,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":93,"newPhones":13,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":7,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":10,"leads":20},{"month":"6月","phones":10,"leads":22},{"month":"7月","phones":10,"leads":25},{"month":"8月","phones":10,"leads":28},{"month":"9月","phones":10,"leads":28},{"month":"10月","phones":10,"leads":20},{"month":"11月","phones":10,"leads":28},{"month":"12月","phones":10,"leads":30}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":10,"leads":15},{"month":"7月","phones":10,"leads":20},{"month":"8月","phones":10,"leads":22},{"month":"9月","phones":10,"leads":22},{"month":"10月","phones":10,"leads":15},{"month":"11月","phones":10,"leads":22},{"month":"12月","phones":10,"leads":25}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本","amt":69300},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
+const DEFAULT_DATA = {"months":["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],"domestic":[{"month":"1月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":154,"xhs_target":49,"sph_target":42,"baodi":245,"challenge":282},{"month":"2月","phones":53,"newPhones":0,"dy_acc":8,"xhs_acc":6,"sph_acc":6,"dy_target":57,"xhs_target":18,"sph_target":15,"baodi":90,"challenge":104},{"month":"3月","phones":83,"newPhones":30,"dy_acc":12,"xhs_acc":10,"sph_acc":10,"dy_target":171,"xhs_target":75,"sph_target":54,"baodi":300,"challenge":345},{"month":"4月","phones":100,"newPhones":17,"dy_acc":20,"xhs_acc":18,"sph_acc":16,"dy_target":166,"xhs_target":90,"sph_target":64,"baodi":320,"challenge":368},{"month":"5月","phones":100,"newPhones":0,"dy_acc":25,"xhs_acc":24,"sph_acc":22,"dy_target":168,"xhs_target":100,"sph_target":67,"baodi":335,"challenge":385},{"month":"6月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":28,"dy_target":172,"xhs_target":106,"sph_target":74,"baodi":352,"challenge":405},{"month":"7月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"8月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"9月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"10月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":113,"xhs_target":67,"sph_target":50,"baodi":230,"challenge":265},{"month":"11月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":403},{"month":"12月","phones":100,"newPhones":0,"dy_acc":30,"xhs_acc":30,"sph_acc":30,"dy_target":172,"xhs_target":102,"sph_target":76,"baodi":350,"challenge":399}],"tk":[{"month":"1月","phones":15,"us_low":235,"us_high":275,"uk":"起号中","low":235,"high":275},{"month":"2月","phones":15,"us_low":240,"us_high":280,"uk":"起号中","low":240,"high":280},{"month":"3月","phones":15,"us_low":245,"us_high":285,"uk":5,"low":250,"high":290},{"month":"4月","phones":15,"us_low":250,"us_high":290,"uk":15,"low":265,"high":305},{"month":"5月","phones":15,"us_low":255,"us_high":295,"uk":20,"low":275,"high":315},{"month":"6月","phones":15,"us_low":260,"us_high":300,"uk":25,"low":285,"high":325},{"month":"7月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"8月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"9月","phones":15,"us_low":260,"us_high":295,"uk":28,"low":288,"high":323},{"month":"10月","phones":15,"us_low":230,"us_high":265,"uk":22,"low":252,"high":287},{"month":"11月","phones":15,"us_low":265,"us_high":300,"uk":30,"low":295,"high":330},{"month":"12月","phones":15,"us_low":270,"us_high":305,"uk":32,"low":302,"high":337}],"ecom":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":10,"leads":0},{"month":"4月","phones":10,"leads":15},{"month":"5月","phones":30,"leads":30},{"month":"6月","phones":30,"leads":35},{"month":"7月","phones":30,"leads":40},{"month":"8月","phones":30,"leads":45},{"month":"9月","phones":30,"leads":45},{"month":"10月","phones":30,"leads":35},{"month":"11月","phones":30,"leads":45},{"month":"12月","phones":30,"leads":48}],"train":[{"month":"1月","phones":0,"leads":0},{"month":"2月","phones":0,"leads":0},{"month":"3月","phones":0,"leads":0},{"month":"4月","phones":0,"leads":0},{"month":"5月","phones":10,"leads":0},{"month":"6月","phones":30,"leads":15},{"month":"7月","phones":30,"leads":25},{"month":"8月","phones":30,"leads":30},{"month":"9月","phones":30,"leads":30},{"month":"10月","phones":30,"leads":22},{"month":"11月","phones":30,"leads":30},{"month":"12月","phones":30,"leads":35}],"salary":[{"r":"国内组长","n":1,"b":5500,"c":2000,"s":1700,"m":9200,"y":110400},{"r":"国内组员A","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国内组员B","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800},{"r":"国外组长","n":1,"b":5000,"c":2000,"s":1700,"m":8700,"y":104400},{"r":"国外组员","n":1,"b":4500,"c":1200,"s":1700,"m":7400,"y":88800}],"costs":[{"name":"人力成本","amt":481200},{"name":"设备成本(已确定)","amt":30800},{"name":"账号基建","amt":138840},{"name":"投放成本","amt":109600},{"name":"新项目运营","amt":38500},{"name":"学习差旅","amt":34200}],"perf":{"baodi":3622,"challenge":4165,"conv":0.11,"order":0.17,"aov":30566,"margin":0.3,"repeat":320000}};
 // Load saved plan data or use defaults
 const DATA = JSON.parse(localStorage.getItem('budget2026_plan') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
 
@@ -379,16 +379,16 @@ function renderKPI() {
   const totalActTK = getTotalActualTK();
   let totalBaodi = 0, totalChallenge = 0;
   DATA.domestic.forEach(d => { totalBaodi += d.baodi; totalChallenge += d.challenge; });
-  const totalCost = 871640;
+  const totalCost = 833140;
   const domRate = totalBaodi > 0 ? (totalActDom/totalBaodi*100) : 0;
 
   const cards = [
     {label:'国内线索(保底)', value: fmt(totalBaodi)+'条', sub:'实际: '+fmt(totalActDom)+' | 达成: '+domRate.toFixed(1)+'%', color:'#1565c0'},
     {label:'国内线索(挑战)', value: fmt(totalChallenge)+'条', sub:'挑战目标 +15%', color:'#6a1b9a'},
     {label:'国外TK(估算)', value:'3,277~3,727条', sub:'实际: '+fmt(totalActTK)+'条', color:'#2e7d32'},
-    {label:'固定年度预算', value: fmtY(totalCost), sub:'月均: '+fmtY(Math.round(totalCost/12)), color:'#e65100'},
+    {label:'固定年度预算', value: fmtY(totalCost), sub:'月均: '+fmtY(Math.round(totalCost/12))+' | 不含浮动设备', color:'#e65100'},
     {label:'团队规模', value:'5人', sub:'月人力成本: '+fmtY(40100), color:'#00695c'},
-    {label:'设备总数', value:'135台', sub:'国内100+国外15+电商10(3月)+培训10', color:'#4527a0'},
+    {label:'设备规划', value:'53→160台', sub:'已到位73台 | 3月底93台 | 全年满编160台(6方向)', color:'#4527a0'},
   ];
 
   let html = '';
@@ -443,7 +443,7 @@ function renderDashTK() {
 }
 
 function renderCostBars() {
-  const total = 871640;
+  const total = 833140;
   const colors = ['#1565c0','#2e7d32','#e65100','#6a1b9a','#00695c','#c62828'];
   let html = '';
   DATA.costs.forEach((c,i) => {
@@ -699,29 +699,45 @@ function renderBudget() {
   document.getElementById('monthlySalaryTable').innerHTML = html;
 
   // Device table
-  html = '<tr><th>项目</th><th>新购台数</th><th>单价</th><th>成本</th><th>说明</th></tr>';
-  const devices = [
-    {name:'国内三平台净增',n:37,p:770,desc:'53台→90台(含3月+7台新开账号)'},
-    {name:'替换旧安卓',n:23,p:770,desc:'含3月替换3台老旧手机'},
-    {name:'评论辅助小号',n:10,p:770,desc:'互动评论'},
-    {name:'电商项目(固定)',n:10,p:770,desc:'3月到位10台，用于电商测试'},
-    {name:'海外培训(固定)',n:10,p:770,desc:'测试期'},
+  html = '<tr><th colspan="5" style="background:#2e7d32;color:#fff;padding:8px">已确定采购（进年度固定预算）</th></tr>';
+  html += '<tr><th>项目</th><th>台数</th><th>单价</th><th>成本</th><th>说明</th></tr>';
+  const devFixed = [
+    {name:'iPhone SE3（3/15已购）',n:20,p:770,desc:'视频号17台+小红书3台'},
+    {name:'小红书追加（3月底）',n:10,p:770,desc:'小红书达到13台'},
+    {name:'电商测试（3月底）',n:10,p:770,desc:'国内电商项目先上10台'},
   ];
-  let devTotal = 0;
-  devices.forEach(d => {
+  let devFixedTotal = 0;
+  devFixed.forEach(d => {
     const cost = d.n * d.p;
-    devTotal += cost;
-    html += `<tr><td class="row-header">${d.name}</td><td>${d.n}</td><td>${fmtY(d.p)}</td><td>${fmtY(cost)}</td><td>${d.desc}</td></tr>`;
+    devFixedTotal += cost;
+    html += `<tr><td class="row-header">${d.name}</td><td style="text-align:center">${d.n}</td><td style="text-align:center">${fmtY(d.p)}</td><td style="text-align:center;font-weight:600">${fmtY(cost)}</td><td>${d.desc}</td></tr>`;
   });
-  html += `<tr class="total-row"><td>固定新购合计</td><td>90</td><td>¥770</td><td>${fmtY(devTotal)}</td><td>进年度预算</td></tr>`;
+  html += `<tr class="total-row"><td>已确定采购合计</td><td style="text-align:center">40台</td><td>¥770</td><td style="font-weight:700">${fmtY(devFixedTotal)}</td><td>进年度固定预算</td></tr>`;
+  html += '<tr><td colspan="5" style="height:4px;background:#e0e0e0;padding:0"></td></tr>';
+  html += '<tr><th colspan="5" style="background:#e65100;color:#fff;padding:8px">待评估采购（浮动预算，按效果分批追加）</th></tr>';
+  html += '<tr><th>项目</th><th>台数</th><th>单价</th><th>成本</th><th>说明</th></tr>';
+  const devFloat = [
+    {name:'小红书补充（4月中旬）',n:17,p:770,desc:'看3月账号流量决定，达标30台'},
+    {name:'电商追加（4月底）',n:20,p:770,desc:'看电商测试效果，达标30台'},
+    {name:'海外工厂首批（5月中旬）',n:10,p:770,desc:'海外项目启动，先上10台'},
+    {name:'海外工厂追加（6月待定）',n:20,p:770,desc:'看海外效果，达标30台'},
+  ];
+  let devFloatTotal = 0;
+  devFloat.forEach(d => {
+    const cost = d.n * d.p;
+    devFloatTotal += cost;
+    html += `<tr style="background:#fff3e0"><td class="row-header">${d.name}</td><td style="text-align:center">${d.n}</td><td style="text-align:center">${fmtY(d.p)}</td><td style="text-align:center;font-weight:600">${fmtY(cost)}</td><td>${d.desc}</td></tr>`;
+  });
+  html += `<tr class="total-row" style="background:#ffe0b2"><td>待评估采购合计</td><td style="text-align:center">67台</td><td>¥770</td><td style="font-weight:700">${fmtY(devFloatTotal)}</td><td>按效果分批触发</td></tr>`;
+  html += `<tr class="total-row" style="background:#ffebee"><td style="font-weight:700">全年设备总计（含待评估）</td><td style="text-align:center;font-weight:700">107台</td><td>¥770</td><td style="font-weight:700">${fmtY(devFixedTotal+devFloatTotal)}</td><td>53台老设备+107台新购=160台满编</td></tr>`;
   document.getElementById('deviceTable').innerHTML = html;
 
   // Budget summary
   html = '<tr><th>费用类别</th><th>年度金额</th><th>占比</th><th>说明</th></tr>';
-  const total = 871640;
+  const total = 833140;
   const budgetItems = [
     {name:'人力成本(5人)',amt:481200,desc:'含提成+社保，暂不预设调薪'},
-    {name:'设备成本(固定90台)',amt:69300,desc:'国内70+电商10+培训10'},
+    {name:'设备成本(已确定40台)',amt:30800,desc:'SE3已购20台+3月底小红书10台+电商10台'},
     {name:'账号基建',amt:138840,desc:'厅卡+实名+认证+测试+线路'},
     {name:'投放成本',amt:109600,desc:'小红书+抖音+TikTok+独立站'},
     {name:'新项目运营',amt:38500,desc:'电商22500+培训16000'},
@@ -731,10 +747,12 @@ function renderBudget() {
     html += `<tr><td class="row-header">${b.name}</td><td style="font-weight:600">${fmtY(b.amt)}</td><td>${(b.amt/total*100).toFixed(1)}%</td><td>${b.desc}</td></tr>`;
   });
   html += `<tr class="total-row"><td>固定预算总计</td><td>${fmtY(total)}</td><td>100%</td><td></td></tr>`;
-  html += '<tr style="background:#fff3e0"><td colspan="4" style="text-align:left;font-weight:600">浮动预算（条件触发）</td></tr>';
+  html += '<tr style="background:#fff3e0"><td colspan="4" style="text-align:left;font-weight:600">浮动预算（条件触发 · 按效果分批追加）</td></tr>';
   const floats = [
-    {name:'电商项目扩张(+20台)',amt:15400,desc:'效果达标后'},
-    {name:'海外培训扩张(+20台)',amt:15400,desc:'学员招收后'},
+    {name:'小红书补充(+17台·4月中)',amt:13090,desc:'看3月账号流量决定'},
+    {name:'电商追加(+20台·4月底)',amt:15400,desc:'看电商测试效果'},
+    {name:'海外工厂首批(+10台·5月中)',amt:7700,desc:'海外项目启动'},
+    {name:'海外工厂追加(+20台·6月)',amt:15400,desc:'看海外效果决定'},
     {name:'TK英区扩设备',amt:7700,desc:'英区月产<15条'},
     {name:'组员增员',amt:88800,desc:'新项目稳定后'},
   ];
@@ -743,7 +761,7 @@ function renderBudget() {
     floatTotal += f.amt;
     html += `<tr><td class="row-header">${f.name}</td><td>${fmtY(f.amt)}</td><td>—</td><td>${f.desc}</td></tr>`;
   });
-  html += `<tr class="total-row" style="background:#ffe0b2"><td>浮动合计(上限)</td><td>${fmtY(floatTotal)}</td><td>—</td><td></td></tr>`;
+  html += `<tr class="total-row" style="background:#ffe0b2"><td>浮动合计(上限)</td><td>${fmtY(floatTotal)}</td><td>—</td><td>设备67台(¥51,590)+英区+增员</td></tr>`;
   document.getElementById('budgetSummaryTable').innerHTML = html;
 }
 
@@ -756,7 +774,7 @@ function renderPerformance() {
   const scenB_leads = totalAct || p.challenge;
   const useActual = totalAct > 0;
 
-  const baseCost = 871640;
+  const baseCost = 833140;
   // Raise cost scenarios: each +500, +1000, +1500 for 7 months (June-Dec)
   const raiseCosts = [0, 7000, 14000, 21000]; // 0, 500*2*7, 1000*2*7, 1500*2*7
   const raiseLabels = ['不调薪', '各+500', '各+1000', '各+1500'];
