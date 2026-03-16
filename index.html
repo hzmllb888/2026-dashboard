@@ -402,14 +402,14 @@ DATA.domestic.forEach(d => {
 
 // ===== Firebase 实时同步 =====
 let firebaseReady = false;
-let skipNextFirebaseRender = false;
+let skipUntil = 0; // 时间戳：在此之前忽略Firebase回写
 
 function save() {
   // 1. 本地缓存（即时）
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
   localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
   // 2. 云端同步（异步）
-  skipNextFirebaseRender = true;
+  skipUntil = Date.now() + 3000; // 3秒内忽略自己的回写
   // 计划数据只有管理员能写入云端
   if (userRole === 'admin') {
     planRef.set(JSON.parse(JSON.stringify(DATA))).catch(err => {
@@ -433,15 +433,33 @@ function showSyncStatus(msg, color) {
   setTimeout(() => ind.classList.remove('show'), 2000);
 }
 
+// 检查是否有输入框正在被编辑
+function isUserEditing() {
+  const active = document.activeElement;
+  return active && (active.tagName === 'INPUT' || active.tagName === 'SELECT' || active.tagName === 'TEXTAREA');
+}
+
+// 记住当前焦点位置，渲染后恢复
+function saveAndRestoreFocus(renderFn) {
+  const active = document.activeElement;
+  const activeId = active ? active.id : null;
+  const selStart = active && active.selectionStart !== undefined ? active.selectionStart : null;
+  renderFn();
+  if (activeId) {
+    const el = document.getElementById(activeId);
+    if (el) { el.focus(); if (selStart !== null) try { el.selectionStart = el.selectionEnd = selStart; } catch(e){} }
+  }
+}
+
 function initFirebase() {
   // 监听计划数据变化（其他人的修改会实时推送过来）
   planRef.on('value', (snapshot) => {
     const val = snapshot.val();
     if (val) {
-      if (skipNextFirebaseRender) { skipNextFirebaseRender = false; return; }
+      // 跳过自己刚写入的回写（3秒窗口）
+      if (Date.now() < skipUntil) return;
       // 用云端数据覆盖本地
       Object.keys(val).forEach(k => { DATA[k] = val[k]; });
-      // 确保计算字段存在
       DATA.domestic.forEach(d => {
         if (d.challenge_ratio === undefined) {
           const b = (d.dy_target||0)+(d.xhs_target||0)+(d.sph_target||0);
@@ -450,9 +468,14 @@ function initFirebase() {
         if (d.overseas === undefined) d.overseas = 0;
       });
       localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
-      safeRenderAll();
+      // 如果用户正在编辑，延迟渲染；否则立即渲染并恢复焦点
+      if (isUserEditing()) {
+        clearTimeout(window._pendingRender);
+        window._pendingRender = setTimeout(() => saveAndRestoreFocus(safeRenderAll), 2000);
+      } else {
+        safeRenderAll();
+      }
     } else if (!firebaseReady) {
-      // Firebase 是空的，上传默认数据作为种子
       planRef.set(JSON.parse(JSON.stringify(DEFAULT_DATA)));
     }
     firebaseReady = true;
@@ -462,8 +485,7 @@ function initFirebase() {
   actualRef.on('value', (snapshot) => {
     const val = snapshot.val();
     if (val) {
-      if (skipNextFirebaseRender) return;
-      // 合并云端数据
+      if (Date.now() < skipUntil) return;
       if (val.domestic) {
         actualData.domestic = val.domestic;
         actualData.domestic.forEach(d => { if (d.overseas === undefined) d.overseas = 0; });
@@ -472,7 +494,12 @@ function initFirebase() {
       if (val.ecom) actualData.ecom = val.ecom;
       if (val.train) actualData.train = val.train;
       localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
-      safeRenderAll();
+      if (isUserEditing()) {
+        clearTimeout(window._pendingRender);
+        window._pendingRender = setTimeout(() => saveAndRestoreFocus(safeRenderAll), 2000);
+      } else {
+        safeRenderAll();
+      }
     } else if (!firebaseReady) {
       actualRef.set(JSON.parse(JSON.stringify(actualData)));
     }
@@ -501,11 +528,13 @@ function initFirebase() {
   });
 }
 
-// 安全渲染：如果用户正在输入则延迟
+// 安全渲染：延迟防抖，避免打断用户输入
+let _renderTimer = null;
 function safeRenderAll() {
-  const active = document.activeElement;
-  if (active && (active.classList.contains('cell-input') || active.tagName === 'INPUT')) {
-    active.addEventListener('blur', () => renderAll(), { once: true });
+  clearTimeout(_renderTimer);
+  if (isUserEditing()) {
+    // 用户在编辑中，延迟2秒再渲染（如果2秒内又触发则重新计时）
+    _renderTimer = setTimeout(() => saveAndRestoreFocus(renderAll), 2000);
     return;
   }
   renderAll();
