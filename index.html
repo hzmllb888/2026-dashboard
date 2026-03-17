@@ -220,8 +220,13 @@ input.cell-input:focus{border-color:#1a237e;outline:none;background:#fff}
 <div class="panel" id="panel5">
   <div class="card">
     <div class="card-title">国内业绩测算（两情景对比） <span class="badge badge-green">实时联动</span></div>
-    <div class="legend"><span>基于实际填写数据自动推算业绩，公式与预算表联动</span></div>
+    <div class="legend"><span>基于实际填写数据自动推算业绩，公式与预算表联动 | 国内运营成本已剔除国外组人力</span></div>
     <div style="overflow-x:auto"><table id="perfTable" class="perf-table"></table></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">国外TK业绩测算（四情景对比） <span class="badge badge-green">精准线索5%~10% | 毛利20%~30%</span></div>
+    <div class="legend"><span>TK线索转化率和毛利率有区间浮动，按低/高两档分别测算 | 无老客复购</span></div>
+    <div style="overflow-x:auto"><table id="tkPerfTable" class="perf-table"></table></div>
   </div>
 </div>
 
@@ -1109,77 +1114,73 @@ function renderPerformance() {
   const totalAct = getTotalActualDomestic();
   const compBaodi = getTotalBaodi();
   const compChallenge = getTotalChallenge();
-
-  // Use actual if available, otherwise use targets
-  const scenA_leads = totalAct || compBaodi;
-  const scenB_leads = totalAct || compChallenge;
   const useActual = totalAct > 0;
 
-  const baseCost = 833140;
-  // Raise cost scenarios: each +500, +1000, +1500 for 7 months (June-Dec)
-  const raiseCosts = [0, 7000, 14000, 21000]; // 0, 500*2*7, 1000*2*7, 1500*2*7
-  const raiseLabels = ['不调薪', '各+500', '各+1000', '各+1500'];
+  // 国内成本：总成本减去国外组（组长104400+组员88800=193200）
+  const foreignLabor = 193200; // 国外组长8700×12 + 国外组员7400×12
+  const domesticCost = 833140 - foreignLabor; // 639,940
 
-  const calc = (leads, extraCost) => {
+  const calcDom = (leads, extraCost) => {
     const precise = Math.round(leads * p.conv);
     const orders = Math.round(precise * p.order);
     const revenue = orders * p.aov;
     const newProfit = Math.round(revenue * p.margin);
     const totalProfit = newProfit + p.repeat;
-    const totalCost = baseCost + extraCost;
+    const totalCost = domesticCost + extraCost;
     const netProfit = totalProfit - totalCost;
     return {leads, precise, orders, revenue, newProfit, totalProfit, totalCost, netProfit};
   };
 
-  const a = calc(compBaodi, 0);
-  const b = calc(compChallenge, 0);
-  const act = useActual ? calc(totalAct, 0) : null;
+  const a = calcDom(compBaodi, 0);
+  const b = calcDom(compChallenge, 0);
+  const act = useActual ? calcDom(totalAct, 0) : null;
 
+  let cols = act ? 4 : 3;
   let html = '<tr><th>推导步骤</th><th>情景A：保底 '+fmt(compBaodi)+'条</th><th>情景B：挑战 '+fmt(compChallenge)+'条</th>';
   if (act) html += '<th style="background:#e8f5e9">实际推算</th>';
   html += '</tr>';
 
   const steps = [
-    {label:'全年线索(条)', ka:'leads', kb:'leads'},
-    {label:'精准线索(x11%)', ka:'precise', kb:'precise'},
-    {label:'下单客户(x17%)', ka:'orders', kb:'orders'},
-    {label:'新客营业额(元)', ka:'revenue', kb:'revenue', isMoney:true},
-    {label:'新客毛利(x30%)', ka:'newProfit', kb:'newProfit', isMoney:true},
-    {label:'老客复购利润(元)', ka:'', kb:'', fixed: p.repeat, isMoney:true},
-    {label:'国内利润合计(元)', ka:'totalProfit', kb:'totalProfit', isMoney:true, bold:true},
-    {label:'总运营成本(元)', ka:'totalCost', kb:'totalCost', isMoney:true},
-    {label:'净利润(元)', ka:'netProfit', kb:'netProfit', isMoney:true, bold:true, highlight:true},
+    {label:'全年线索(条)', k:'leads'},
+    {label:'精准线索(x11%)', k:'precise'},
+    {label:'下单客户(x17%)', k:'orders'},
+    {label:'新客营业额(元)', k:'revenue', isMoney:true},
+    {label:'新客毛利(x30%)', k:'newProfit', isMoney:true},
+    {label:'老客复购利润(元)', fixed: p.repeat, isMoney:true},
+    {label:'国内利润合计(元)', k:'totalProfit', isMoney:true, bold:true},
+    {label:'国内运营成本(元)', k:'totalCost', isMoney:true, note:'已剔除国外组人力'+fmtY(foreignLabor)},
+    {label:'国内净利润(元)', k:'netProfit', isMoney:true, bold:true, highlight:true},
   ];
 
   steps.forEach(s => {
-    const va = s.fixed !== undefined ? s.fixed : a[s.ka];
-    const vb = s.fixed !== undefined ? s.fixed : b[s.kb];
+    const va = s.fixed !== undefined ? s.fixed : a[s.k];
+    const vb = s.fixed !== undefined ? s.fixed : b[s.k];
     const fmtFn = s.isMoney ? fmtY : fmt;
     const style = s.bold ? 'font-weight:700' : '';
     const cls = s.highlight ? (va >= 0 ? 'pos' : 'neg') : '';
     const clsB = s.highlight ? (vb >= 0 ? 'pos' : 'neg') : '';
-
-    html += `<tr><td class="row-header">${s.label}</td><td style="${style}" class="${cls}">${fmtFn(va)}</td><td style="${style}" class="${clsB}">${fmtFn(vb)}</td>`;
+    html += `<tr><td class="row-header">${s.label}${s.note?'<br><span style="font-size:10px;color:#666">'+s.note+'</span>':''}</td><td style="${style}" class="${cls}">${fmtFn(va)}</td><td style="${style}" class="${clsB}">${fmtFn(vb)}</td>`;
     if (act) {
-      const vact = s.fixed !== undefined ? s.fixed : act[s.ka];
+      const vact = s.fixed !== undefined ? s.fixed : act[s.k];
       const clsAct = s.highlight ? (vact >= 0 ? 'pos' : 'neg') : '';
       html += `<td style="${style};background:#e8f5e9" class="${clsAct}">${fmtFn(vact)}</td>`;
     }
     html += '</tr>';
   });
 
-  // Add raise impact section
-  html += '<tr style="background:#fff3e0"><td colspan="' + (act ? 4 : 3) + '" style="font-weight:600;padding:10px">组长调薪对净利润的影响（6月起生效，影响7个月）</td></tr>';
+  // 国内组长调薪影响
+  const raiseCosts = [0, 7000, 14000, 21000];
+  const raiseLabels = ['不调薪', '各+500', '各+1000', '各+1500'];
+  html += '<tr style="background:#fff3e0"><td colspan="'+cols+'" style="font-weight:600;padding:10px">国内组长调薪对净利润的影响（6月起生效，影响7个月）</td></tr>';
   html += '<tr><th>调薪方案</th><th>情景A净利润</th><th>情景B净利润</th>';
   if (act) html += '<th style="background:#e8f5e9">实际推算净利润</th>';
   html += '</tr>';
-
   raiseCosts.forEach((rc, idx) => {
-    const ra = calc(p.baodi, rc);
-    const rb = calc(p.challenge, rc);
-    const ract = useActual ? calc(totalAct, rc) : null;
+    const ra = calcDom(compBaodi, rc);
+    const rb = calcDom(compChallenge, rc);
+    const ract = useActual ? calcDom(totalAct, rc) : null;
     const cls = idx === 0 ? 'total-row' : '';
-    html += `<tr class="${cls}"><td class="row-header">${raiseLabels[idx]}${rc ? ' (成本+'+fmtY(rc)+')' : ''}</td>`;
+    html += `<tr class="${cls}"><td class="row-header">${raiseLabels[idx]}${rc?' (成本+'+fmtY(rc)+')':''}</td>`;
     html += `<td style="font-weight:600" class="${ra.netProfit>=0?'pos':'neg'}">${fmtY(ra.netProfit)}</td>`;
     html += `<td style="font-weight:600" class="${rb.netProfit>=0?'pos':'neg'}">${fmtY(rb.netProfit)}</td>`;
     if (ract) html += `<td style="font-weight:600;background:#e8f5e9" class="${ract.netProfit>=0?'pos':'neg'}">${fmtY(ract.netProfit)}</td>`;
@@ -1187,6 +1188,84 @@ function renderPerformance() {
   });
 
   document.getElementById('perfTable').innerHTML = html;
+
+  // ========== 国外TK业绩测算 ==========
+  const tkActTotal = getTotalActualTK();
+  const tkLow = getTotalTKLow();
+  const tkHigh = getTotalTKHigh();
+  const tkUseActual = tkActTotal > 0;
+  const tkAov = 30566; // 同国内客单价
+
+  const calcTK = (leads, convRate, marginRate) => {
+    const precise = Math.round(leads * convRate);
+    const orders = Math.round(precise * p.order);
+    const revenue = orders * tkAov;
+    const profit = Math.round(revenue * marginRate);
+    return {leads, precise, orders, revenue, profit};
+  };
+
+  // 4个情景：低目标x低转化, 低目标x高转化, 高目标x低转化, 高目标x高转化
+  const tkScenarios = [
+    {label:'低目标×低转化', leads:tkLow, conv:0.05, margin:0.20},
+    {label:'低目标×高转化', leads:tkLow, conv:0.10, margin:0.30},
+    {label:'高目标×低转化', leads:tkHigh, conv:0.05, margin:0.20},
+    {label:'高目标×高转化', leads:tkHigh, conv:0.10, margin:0.30},
+  ];
+
+  let tkHtml = '<tr><th>推导步骤</th>';
+  tkScenarios.forEach(sc => { tkHtml += '<th>'+sc.label+'</th>'; });
+  if (tkUseActual) tkHtml += '<th style="background:#e8f5e9">实际(低转化)</th><th style="background:#e8f5e9">实际(高转化)</th>';
+  tkHtml += '</tr>';
+
+  const tkResults = tkScenarios.map(sc => calcTK(sc.leads, sc.conv, sc.margin));
+  const tkActLow = tkUseActual ? calcTK(tkActTotal, 0.05, 0.20) : null;
+  const tkActHigh = tkUseActual ? calcTK(tkActTotal, 0.10, 0.30) : null;
+
+  const tkSteps = [
+    {label:'全年线索(条)', k:'leads'},
+    {label:'精准线索', k:'precise', convLabel:true},
+    {label:'下单客户(x17%)', k:'orders'},
+    {label:'营业额(元)', k:'revenue', isMoney:true},
+    {label:'毛利(元)', k:'profit', isMoney:true, bold:true, marginLabel:true},
+  ];
+
+  tkSteps.forEach(s => {
+    tkHtml += '<tr><td class="row-header">' + s.label + '</td>';
+    tkScenarios.forEach((sc,idx) => {
+      const v = tkResults[idx][s.k];
+      const fmtFn = s.isMoney ? fmtY : fmt;
+      let lbl = s.convLabel ? '(x'+Math.round(sc.conv*100)+'%)' : '';
+      if (s.marginLabel) lbl = '(x'+Math.round(sc.margin*100)+'%)';
+      tkHtml += `<td style="${s.bold?'font-weight:700':''}">${fmtFn(v)}${lbl?' <span style="font-size:10px;color:#888">'+lbl+'</span>':''}</td>`;
+    });
+    if (tkUseActual) {
+      const fmtFn = s.isMoney ? fmtY : fmt;
+      tkHtml += `<td style="${s.bold?'font-weight:700':''};background:#e8f5e9">${fmtFn(tkActLow[s.k])}</td>`;
+      tkHtml += `<td style="${s.bold?'font-weight:700':''};background:#e8f5e9">${fmtFn(tkActHigh[s.k])}</td>`;
+    }
+    tkHtml += '</tr>';
+  });
+
+  // TK成本与净利润
+  tkHtml += '<tr style="background:#e3f2fd"><td class="row-header">国外组人力成本(元)<br><span style="font-size:10px;color:#666">组长'+fmtY(104400)+' + 组员'+fmtY(88800)+'</span></td>';
+  for (let i=0; i<tkScenarios.length; i++) tkHtml += '<td>'+fmtY(foreignLabor)+'</td>';
+  if (tkUseActual) { tkHtml += '<td style="background:#e8f5e9">'+fmtY(foreignLabor)+'</td>'; tkHtml += '<td style="background:#e8f5e9">'+fmtY(foreignLabor)+'</td>'; }
+  tkHtml += '</tr>';
+
+  tkHtml += '<tr style="font-weight:700"><td class="row-header" style="font-weight:700">TK净利润(元)</td>';
+  tkScenarios.forEach((sc,idx) => {
+    const net = tkResults[idx].profit - foreignLabor;
+    tkHtml += `<td class="${net>=0?'pos':'neg'}" style="font-weight:700">${fmtY(net)}</td>`;
+  });
+  if (tkUseActual) {
+    const netL = tkActLow.profit - foreignLabor;
+    const netH = tkActHigh.profit - foreignLabor;
+    tkHtml += `<td class="${netL>=0?'pos':'neg'}" style="font-weight:700;background:#e8f5e9">${fmtY(netL)}</td>`;
+    tkHtml += `<td class="${netH>=0?'pos':'neg'}" style="font-weight:700;background:#e8f5e9">${fmtY(netH)}</td>`;
+  }
+  tkHtml += '</tr>';
+
+  document.getElementById('tkPerfTable').innerHTML = tkHtml;
 }
 
 function renderDeviceStats() {
