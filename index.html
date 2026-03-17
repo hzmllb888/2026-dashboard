@@ -412,20 +412,22 @@ let firebaseReady = false;
 let skipUntil = 0; // 时间戳：在此之前忽略Firebase回写
 
 function save() {
-  // 1. 本地缓存（即时）
+  // 1. 本地缓存
   localStorage.setItem('budget2026_actual', JSON.stringify(actualData));
   localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
-  // 2. 云端同步（异步）
-  skipUntil = Date.now() + 3000; // 3秒内忽略自己的回写
-  // 计划数据写入云端（所有人都可以）
-  planRef.set(JSON.parse(JSON.stringify(DATA))).catch(err => {
+  // 2. 先更新数据指纹（这样Firebase回推时发现hash一样就不会重复刷新）
+  const planCopy = JSON.parse(JSON.stringify(DATA));
+  const actCopy = JSON.parse(JSON.stringify(actualData));
+  lastPlanHash = JSON.stringify(planCopy);
+  lastActualHash = JSON.stringify(actCopy);
+  // 3. 写入Firebase云端（所有人都能保存，实时同步到所有设备）
+  planRef.set(planCopy).catch(err => {
     console.error('Firebase plan save failed:', err);
-    showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
+    showSyncStatus('云端同步失败', '#c62828');
   });
-  // 实际数据写入云端
-  actualRef.set(JSON.parse(JSON.stringify(actualData))).catch(err => {
+  actualRef.set(actCopy).catch(err => {
     console.error('Firebase actual save failed:', err);
-    showSyncStatus('云端同步失败 - 数据已保存本地', '#c62828');
+    showSyncStatus('云端同步失败', '#c62828');
   });
   showSyncStatus('✓ 已同步云端', '#2e7d32');
 }
@@ -456,24 +458,29 @@ function saveAndRestoreFocus(renderFn) {
   }
 }
 
+// 数据指纹：只在云端数据真正变化时才刷新（防止自己写入后回推导致页面闪烁/数据跳回）
+let lastPlanHash = '';
+let lastActualHash = '';
+
 function initFirebase() {
-  // 监听计划数据变化（其他人的修改会实时推送过来）
+  // 首次加载时记录当前本地数据指纹
+  lastPlanHash = JSON.stringify(DATA);
+  lastActualHash = JSON.stringify(actualData);
+
+  // 监听计划数据变化
   planRef.on('value', (snapshot) => {
     const val = snapshot.val();
     if (val) {
-      // 跳过自己刚写入的回写（3秒窗口）
-      if (Date.now() < skipUntil) return;
-      // 用云端数据覆盖本地
+      const hash = JSON.stringify(val);
+      if (hash === lastPlanHash) return; // 数据没变，跳过
+      lastPlanHash = hash;
       Object.keys(val).forEach(k => { DATA[k] = val[k]; });
       DATA.domestic.forEach(d => {
-        if (d.challenge_ratio === undefined) {
-          const b = (d.dy_target||0)+(d.xhs_target||0)+(d.sph_target||0);
-          d.challenge_ratio = b > 0 ? 1.15 : 1.15;
-        }
+        if (d.baodi === undefined) d.baodi = (d.dy_target||0)+(d.xhs_target||0)+(d.sph_target||0);
+        if (d.challenge === undefined) d.challenge = Math.round(d.baodi * 1.15);
         if (d.overseas === undefined) d.overseas = 0;
       });
       localStorage.setItem('budget2026_plan', JSON.stringify(DATA));
-      // 如果用户正在编辑，延迟渲染；否则立即渲染并恢复焦点
       if (isUserEditing()) {
         clearTimeout(window._pendingRender);
         window._pendingRender = setTimeout(() => saveAndRestoreFocus(safeRenderAll), 2000);
@@ -490,7 +497,9 @@ function initFirebase() {
   actualRef.on('value', (snapshot) => {
     const val = snapshot.val();
     if (val) {
-      if (Date.now() < skipUntil) return;
+      const hash = JSON.stringify(val);
+      if (hash === lastActualHash) return; // 数据没变，跳过
+      lastActualHash = hash;
       if (val.domestic) {
         actualData.domestic = val.domestic;
         actualData.domestic.forEach(d => { if (d.overseas === undefined) d.overseas = 0; });
